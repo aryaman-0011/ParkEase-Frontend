@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+  background: #0a0a0a;
+}
+
+::selection {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+/* ───── Global: cursor pointer on all interactive elements ───── */
+button,
+a,
+[role="button"],
+input[type="submit"],
+input[type="button"],
+input[type="checkbox"],
+label[for],
+.cursor-pointer {
+  cursor: pointer;
+}
+
+button:disabled,
+a:disabled {
+  cursor: not-allowed;
+}
+
+/* ───── Smooth Transitions ───── */
+* {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Cards, buttons, and interactive elements get smooth transitions */
+.card,
+.stat-card,
+.table-card,
+.quick-action-card,
+.action-btn,
+.mobile-action-btn,
+.pagination-btn,
+.role-option,
+.role-option-active,
+.badge {
+  transition: all 0.2s ease;
+}
+
+/* Form inputs get smooth focus transitions */
+input, select, textarea {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+/* Links and nav items */
+a, button {
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease, transform 0.15s ease;
+}
+
+/* ───── Spin (for loaders — keeping this) ───── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* ───── Scrollbar ───── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
