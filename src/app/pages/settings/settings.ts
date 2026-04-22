@@ -34,6 +34,10 @@ export class SettingsComponent implements OnInit {
   // Deactivate
   confirmDeactivate = false;
 
+  // Delete Account
+  showDeleteModal = false;
+  deleteConfirmText = '';
+
   constructor(
     private authService: AuthService,
     private router: Router,
@@ -130,6 +134,39 @@ export class SettingsComponent implements OnInit {
       error: (err) => {
         this.loading = false;
         this.error = err.error?.message || 'Failed to deactivate account';
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  openDeleteModal(): void {
+    this.showDeleteModal = true;
+    this.deleteConfirmText = '';
+    this.error = '';
+  }
+
+  closeDeleteModal(): void {
+    this.showDeleteModal = false;
+    this.deleteConfirmText = '';
+  }
+
+  onDeleteAccount(): void {
+    if (this.deleteConfirmText.trim().toLowerCase() !== 'yes') {
+      this.error = 'Please type "yes" to confirm account deletion';
+      this.cdr.detectChanges();
+      return;
+    }
+    this.error = '';
+    this.loading = true;
+    this.authService.deleteAccount().subscribe({
+      next: () => {
+        this.loading = false;
+        this.authService.logout();
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        this.loading = false;
+        this.error = err.error?.message || 'Failed to delete account';
         this.cdr.detectChanges();
       },
     });

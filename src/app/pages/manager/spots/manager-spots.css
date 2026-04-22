@@ -1,0 +1,81 @@
+/* ───── Filters ───── */
+.filter-btn {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.filter-btn:hover { color: #aaa; }
+.filter-active { color: #fff; background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); }
+.filter-active-green { color: #34d399; background: rgba(52,211,153,0.06); border-color: rgba(52,211,153,0.1); }
+.filter-active-amber { color: #fbbf24; background: rgba(251,191,36,0.06); border-color: rgba(251,191,36,0.1); }
+.filter-active-red { color: #f87171; background: rgba(248,113,113,0.06); border-color: rgba(248,113,113,0.1); }
+
+/* ───── Card ───── */
+.spot-card {
+  border-radius: 14px;
+  padding: 16px;
+  background: #1e1d1b;
+  border: 1px solid #2a2926;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.spot-card:hover {
+  border-color: #3a3835;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+}
+
+/* Override text colors inside spot-card */
+.spot-card .text-white { color: #e8e4df !important; }
+.spot-card .text-neutral-600 { color: #8a857e !important; }
+.spot-card .text-neutral-400 { color: #b0aaa2 !important; }
+
+/* ───── Status dot ───── */
+.s-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.s-dot-green { background: #22c55e; }
+.s-dot-amber { background: #eab308; }
+.s-dot-red { background: #ef4444; }
+
+/* ───── Actions ───── */
+.card-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.act-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 28px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+.act-btn:hover { background: rgba(255,255,255,0.05); }
+.act-release { color: #34d399; }
+.act-delete { color: #666; }
+.act-delete:hover { color: #f87171; }
+
+/* ───── Skeleton ───── */
+.spot-skeleton {
+  height: 140px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.04);
+}

@@ -1,0 +1,140 @@
+<div class="min-h-screen bg-neutral-950 text-white">
+  <nav class="border-b border-white/10 px-4 sm:px-8 py-4 flex flex-wrap items-center justify-between gap-3">
+    <a routerLink="/lots/search" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+      <svg class="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+      <span class="text-neutral-400 text-sm">Back to Search</span>
+    </a>
+    <a routerLink="/dashboard" class="text-sm text-neutral-500 hover:text-white transition-colors">Dashboard</a>
+  </nav>
+
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+
+    <!-- Lot Header -->
+    @if (lot) {
+      <div class="mb-8">
+        <h1 class="text-2xl font-bold tracking-tight mb-1">{{ lot.name }}</h1>
+        <p class="text-neutral-500 text-sm">{{ lot.address }}, {{ lot.city }}</p>
+        <div class="flex items-center gap-4 mt-3">
+          @if (lot.pricePerHour) {
+            <span class="inline-flex items-center gap-1.5 text-sm bg-white/[0.04] border border-white/[0.08] px-3 py-1 rounded-lg">
+              <span class="text-neutral-400">Base price:</span>
+              <span class="text-white font-semibold">₹{{ lot.pricePerHour }}/hr</span>
+            </span>
+          }
+          @if (!lot.open) {
+            <span class="text-xs font-bold uppercase tracking-wider text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-1 rounded-lg">Closed</span>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Availability Summary -->
+    @if (counts && counts.total > 0) {
+      <!-- Individual spots exist in spot-service -->
+      <div class="bg-white/[0.03] border border-white/[0.06] rounded-xl p-5 mb-8">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-sm text-neutral-400">Spot Availability</span>
+          <span class="text-sm font-semibold">{{ counts.available }} <span class="text-neutral-500 font-normal">of {{ counts.total }} available</span></span>
+        </div>
+        <div class="w-full h-2 bg-white/[0.06] rounded-full overflow-hidden flex">
+          <div class="h-full bg-emerald-500 transition-all" [style.width.%]="(counts.available / counts.total) * 100"></div>
+          <div class="h-full bg-amber-500 transition-all" [style.width.%]="(counts.reserved / counts.total) * 100"></div>
+          <div class="h-full bg-red-500 transition-all" [style.width.%]="(counts.occupied / counts.total) * 100"></div>
+        </div>
+        <div class="flex items-center gap-5 mt-2 text-[11px] text-neutral-500">
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Available ({{ counts.available }})</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Reserved ({{ counts.reserved }})</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500"></span> Occupied ({{ counts.occupied }})</span>
+        </div>
+      </div>
+    } @else if (lot && counts && counts.total === 0) {
+      <!-- No individual spots, fall back to lot-level data -->
+      <div class="bg-white/[0.03] border border-white/[0.06] rounded-xl p-5 mb-8">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-sm text-neutral-400">Lot Availability</span>
+          <span class="text-sm font-semibold">{{ lot.availableSpots }} <span class="text-neutral-500 font-normal">of {{ lot.totalSpots }} available</span></span>
+        </div>
+        <div class="w-full h-2 bg-white/[0.06] rounded-full overflow-hidden flex">
+          @if (lot.totalSpots > 0) {
+            <div class="h-full bg-emerald-500 transition-all" [style.width.%]="(lot.availableSpots / lot.totalSpots) * 100"></div>
+          }
+        </div>
+        <p class="text-[11px] text-neutral-600 mt-2">
+          ℹ️ This lot has {{ lot.totalSpots }} parking spots. Individual spot selection will be available soon.
+        </p>
+      </div>
+    }
+
+    <!-- Content based on whether individual spots exist -->
+    @if (!loading && counts && counts.total > 0) {
+      <!-- Type Filters -->
+      <div class="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
+        <button (click)="filterType = 'ALL'" [class]="filterType === 'ALL' ? 'filter-pill filter-pill-active' : 'filter-pill'">All Types</button>
+        @for (t of spotTypes; track t) {
+          <button (click)="filterType = t" [class]="filterType === t ? 'filter-pill filter-pill-active' : 'filter-pill'">
+            {{ getSpotTypeIcon(t) }} {{ t }}
+          </button>
+        }
+      </div>
+
+      <!-- Spot Grid -->
+      @if (filteredSpots.length > 0) {
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+          @for (spot of filteredSpots; track spot.spotId) {
+            <div class="spot-tile">
+              <!-- Number + dot -->
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[15px] font-bold tracking-wide text-white">{{ spot.spotNumber }}</span>
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              </div>
+
+              <p class="text-[10px] font-medium uppercase tracking-widest text-emerald-500 mb-3">Available</p>
+
+              <!-- Info -->
+              <div class="text-[11px] text-neutral-600 space-y-1">
+                <div class="flex items-center justify-between">
+                  <span>{{ getSpotTypeIcon(spot.spotType) }} Floor {{ spot.floor }} · {{ getTypeLabel(spot.vehicleType) }}</span>
+                </div>
+                @if (spot.pricePerHour) {
+                  <p class="text-neutral-400 font-medium">₹{{ spot.pricePerHour }}/hr</p>
+                }
+                @if (spot.isHandicapped || spot.isEVCharging) {
+                  <div class="flex gap-2 text-[10px]">
+                    @if (spot.isHandicapped) { <span class="text-blue-400/60">♿</span> }
+                    @if (spot.isEVCharging) { <span class="text-green-400/60">⚡</span> }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="text-center py-20">
+          <p class="text-5xl mb-4">😔</p>
+          <p class="text-neutral-500 text-lg">No available spots right now</p>
+          <p class="text-neutral-600 text-sm mt-1">All spots are currently reserved or occupied</p>
+        </div>
+      }
+    } @else if (!loading && counts && counts.total === 0 && lot) {
+      <!-- Lot-level view: no individual spots configured yet -->
+      <div class="text-center py-16">
+        <div class="w-20 h-20 bg-emerald-500/[0.07] border border-emerald-500/[0.15] rounded-2xl flex items-center justify-center mx-auto mb-5">
+          <span class="text-4xl">🅿️</span>
+        </div>
+        <p class="text-white text-lg font-semibold mb-1">{{ lot.availableSpots }} spots available</p>
+        <p class="text-neutral-500 text-sm">This lot has {{ lot.totalSpots }} total parking spots at ₹{{ lot.pricePerHour }}/hr</p>
+        <p class="text-neutral-600 text-xs mt-3">Individual spot selection coming soon — you can park at any available spot</p>
+      </div>
+    }
+
+    <!-- Loading -->
+    @if (loading) {
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+        @for (i of [1,2,3,4,5,6,7,8,9,10]; track i) {
+          <div class="spot-skeleton"></div>
+        }
+      </div>
+    }
+  </div>
+</div>
+

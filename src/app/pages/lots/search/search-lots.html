@@ -1,0 +1,197 @@
+<div class="min-h-screen bg-neutral-950 text-white">
+  <nav class="border-b border-white/10 px-4 sm:px-8 py-4 flex flex-wrap items-center justify-between gap-3">
+    <a routerLink="/dashboard" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+      <div class="w-9 h-9 bg-white rounded-xl flex items-center justify-center">
+        <span class="text-lg font-black text-neutral-900">P</span>
+      </div>
+      <span class="text-lg font-bold tracking-tight">ParkEase</span>
+    </a>
+    <a routerLink="/dashboard" class="text-sm text-neutral-400 hover:text-white border border-white/10 px-4 py-2 rounded-lg hover:bg-white/5 transition-all">Dashboard</a>
+  </nav>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-8 py-10">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold">Find Parking</h1>
+      <p class="text-neutral-500 mt-1">Search nearby parking lots or browse by city</p>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="flex flex-col sm:flex-row gap-3 mb-8">
+      <div class="flex-1 relative">
+        <svg class="w-5 h-5 text-neutral-600 absolute left-4 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+        <input [(ngModel)]="searchCity" name="searchCity" placeholder="Search by city... e.g., Delhi, Mumbai"
+          (keyup.enter)="searchByCity()"
+          class="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3.5 text-white placeholder-neutral-600 focus:outline-none focus:border-white/30 transition-all" />
+      </div>
+      <button (click)="searchByCity()" class="bg-white text-neutral-900 font-semibold px-6 py-3.5 rounded-xl hover:bg-neutral-200 active:scale-[0.98] transition-all">
+        Search
+      </button>
+      <button (click)="findNearby()" class="border border-white/10 text-white px-5 py-3.5 rounded-xl hover:bg-white/5 transition-all flex items-center gap-2"
+        [disabled]="locating || loading">
+        @if (locating) {
+          <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+        } @else {
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+        }
+        Nearby
+      </button>
+    </div>
+
+    <!-- Error -->
+    @if (error) {
+      <div class="mb-6 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-red-400 text-sm">{{ error }}</div>
+    }
+
+    <!-- Loading State: Skeleton Cards -->
+    @if (loading || locating) {
+      <div class="mb-6">
+        <div class="flex items-center gap-3 text-neutral-400 text-sm">
+          <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+          @if (locating) {
+            <span>Getting your location...</span>
+          } @else {
+            <span>Searching for parking lots...</span>
+          }
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (i of [1,2,3,4,5,6]; track i) {
+          <div class="skeleton-card">
+            <div class="skeleton-image">
+              <div class="skeleton-shimmer"></div>
+            </div>
+            <div class="skeleton-body">
+              <div class="skeleton-line skeleton-title"></div>
+              <div class="skeleton-line skeleton-addr"></div>
+              <div class="skeleton-line skeleton-city"></div>
+              <div class="skeleton-bottom">
+                <div class="skeleton-line skeleton-price"></div>
+                <div class="skeleton-line skeleton-spots"></div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Results Info -->
+    @if (!loading && !locating && searched) {
+      <p class="text-neutral-500 text-sm mb-6">
+        Found <span class="text-white font-medium">{{ lots.length }}</span> parking lot{{ lots.length !== 1 ? 's' : '' }}
+        @if (searchLabel) { <span>for "{{ searchLabel }}"</span> }
+      </p>
+    }
+
+    <!-- No Results -->
+    @if (!loading && !locating && searched && lots.length === 0) {
+      <div class="text-center py-16">
+        <div class="empty-icon-wrapper">
+          <svg class="w-8 h-8 text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/></svg>
+        </div>
+        <p class="text-neutral-500 text-lg mt-4">No parking lots found</p>
+        <p class="text-neutral-600 text-sm mt-1">Try a different city or search nearby</p>
+      </div>
+    }
+
+    <!-- Lot Grid -->
+    @if (!loading && !locating) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (lot of lots; track lot.id) {
+          <div class="lot-card" [class.lot-card-closed]="!lot.open">
+            <!-- Card Image / Header -->
+            <div class="lot-card-header">
+              @if (lot.imageUrl) {
+                <img [src]="lot.imageUrl" [alt]="lot.name" class="lot-card-image" />
+                <div class="lot-card-image-overlay"></div>
+              } @else {
+                <div class="lot-card-gradient"></div>
+                <svg class="w-10 h-10 text-white/20 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 0h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z"/></svg>
+              }
+
+              <!-- Distance Badge -->
+              @if (lot.distanceKm != null) {
+                <span class="lot-badge distance-badge">
+                  <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+                  {{ lot.distanceKm }} km
+                </span>
+              }
+
+              <!-- Status Badge -->
+              @if (!lot.open) {
+                <span class="lot-badge status-badge status-closed">
+                  <span class="status-dot dot-closed"></span> Closed
+                </span>
+              } @else if (lot.availableSpots === 0) {
+                <span class="lot-badge status-badge status-full">
+                  <span class="status-dot dot-full"></span> Full
+                </span>
+              } @else {
+                <span class="lot-badge status-badge status-open">
+                  <span class="status-dot dot-open"></span> Open
+                </span>
+              }
+            </div>
+
+            <!-- Card Body -->
+            <div class="lot-card-body">
+              <h3 class="font-semibold text-[15px] text-white mb-1.5 truncate">{{ lot.name }}</h3>
+              <p class="text-neutral-500 text-sm mb-0.5 flex items-center gap-1.5 truncate">
+                <svg class="w-3.5 h-3.5 shrink-0 text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+                {{ lot.address }}
+              </p>
+              <p class="text-neutral-600 text-xs mb-4">{{ lot.city }}{{ lot.state ? ', ' + lot.state : '' }}</p>
+
+              <!-- Price & Spots Row -->
+              <div class="flex items-end justify-between mb-3">
+                <span class="text-2xl font-bold tracking-tight">₹{{ lot.pricePerHour }}<span class="text-xs text-neutral-500 font-normal ml-0.5">/hr</span></span>
+                @if (lot.open) {
+                  <span class="text-xs font-medium"
+                    [class]="lot.availableSpots > 0 ? 'text-emerald-400' : 'text-red-400'">
+                    {{ lot.availableSpots }}/{{ lot.totalSpots }} spots
+                  </span>
+                } @else {
+                  <span class="text-xs font-medium text-neutral-600">Currently closed</span>
+                }
+              </div>
+
+              <!-- Availability Progress Bar -->
+              @if (lot.open) {
+                <div class="spots-bar-bg">
+                  <div class="spots-bar-fill"
+                    [style.width.%]="(lot.availableSpots / lot.totalSpots) * 100"
+                    [class.bar-green]="lot.availableSpots / lot.totalSpots > 0.3"
+                    [class.bar-amber]="lot.availableSpots / lot.totalSpots > 0.1 && lot.availableSpots / lot.totalSpots <= 0.3"
+                    [class.bar-red]="lot.availableSpots / lot.totalSpots <= 0.1">
+                  </div>
+                </div>
+              } @else {
+                <div class="spots-bar-bg">
+                  <div class="spots-bar-fill bar-closed" style="width: 100%"></div>
+                </div>
+              }
+
+              <!-- View Spots Button -->
+              @if (lot.open && lot.availableSpots > 0) {
+                <a [routerLink]="['/lots', lot.id, 'spots']"
+                  class="mt-3 block text-center text-sm py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/15 transition-all font-medium">
+                  View Available Spots →
+                </a>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Initial State -->
+    @if (!loading && !locating && !searched) {
+      <div class="text-center py-16">
+        <div class="empty-icon-wrapper">
+          <svg class="w-8 h-8 text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+        </div>
+        <p class="text-neutral-500 text-lg mt-4">Search for parking lots</p>
+        <p class="text-neutral-600 text-sm mt-1">Enter a city name or click "Nearby" to find lots near you</p>
+      </div>
+    }
+  </div>
+</div>

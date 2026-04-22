@@ -1,0 +1,43 @@
+/* ───── Filters ───── */
+.filter-pill {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #555;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+.filter-pill:hover { color: #aaa; }
+.filter-pill-active { color: #fff; background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); }
+
+/* ───── Card ───── */
+.spot-tile {
+  border-radius: 14px;
+  padding: 16px;
+  background: #1e1d1b;
+  border: 1px solid #2a2926;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.spot-tile:hover {
+  border-color: #3a3835;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+}
+
+/* Override text colors inside spot-tile */
+.spot-tile .text-white { color: #e8e4df !important; }
+.spot-tile .text-neutral-600 { color: #8a857e !important; }
+.spot-tile .text-neutral-500 { color: #8a857e !important; }
+.spot-tile .text-neutral-400 { color: #b0aaa2 !important; }
+
+/* ───── Skeleton ───── */
+.spot-skeleton {
+  height: 130px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.04);
+}

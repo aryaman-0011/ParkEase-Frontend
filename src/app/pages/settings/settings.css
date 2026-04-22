@@ -14,7 +14,60 @@
 }
 
 .danger-card {
-  border-color: rgba(239, 68, 68, 0.15);
+  border-color: rgba(245, 158, 11, 0.15);
+}
+
+.danger-card:hover {
+  border-color: rgba(245, 158, 11, 0.25);
+  box-shadow: 0 8px 32px rgba(245, 158, 11, 0.06), 0 0 0 1px rgba(245, 158, 11, 0.08);
+}
+
+/* ───── Danger Zone Grid ───── */
+.danger-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: stretch;
+}
+
+@media (max-width: 768px) {
+  .danger-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.danger-card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.danger-card-footer {
+  margin-top: auto;
+}
+
+.danger-grid > .card {
+  display: flex;
+  flex-direction: column;
+}
+
+.danger-grid > .card > .card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.deactivate-icon-wrapper {
+  width: 44px;
+  height: 44px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fbbf24;
+  flex-shrink: 0;
 }
 
 .card-header {
@@ -146,18 +199,19 @@
   gap: 8px;
   width: 100%;
   padding: 14px 24px;
-  background: rgba(239, 68, 68, 0.12);
-  color: #f87171;
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
   font-weight: 600;
   font-size: 15px;
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.2);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .btn-danger:hover:not(:disabled) {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.35);
 }
 
 .btn-danger:active:not(:disabled) {
@@ -187,4 +241,190 @@
   color: #ffffff;
 }
 
+/* ───── Delete Account Card ───── */
+.delete-card {
+  border-color: rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.02);
+}
 
+.delete-card:hover {
+  border-color: rgba(239, 68, 68, 0.3);
+  box-shadow: 0 8px 32px rgba(239, 68, 68, 0.08), 0 0 0 1px rgba(239, 68, 68, 0.1);
+}
+
+.delete-icon-wrapper {
+  width: 44px;
+  height: 44px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f87171;
+  flex-shrink: 0;
+}
+
+.btn-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 24px;
+  background: rgba(220, 38, 38, 0.15);
+  color: #fca5a5;
+  font-weight: 600;
+  font-size: 15px;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-delete:hover:not(:disabled) {
+  background: rgba(220, 38, 38, 0.25);
+  color: #fecaca;
+  border-color: rgba(220, 38, 38, 0.5);
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.15);
+}
+
+.btn-delete:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-delete:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ───── Modal ───── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+  background: #171717;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 460px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-cancel {
+  flex: 1;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #a3a3a3;
+  font-weight: 500;
+  font-size: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.btn-delete-confirm {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: #dc2626;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-delete-confirm:hover:not(:disabled) {
+  background: #b91c1c;
+  box-shadow: 0 0 24px rgba(220, 38, 38, 0.3);
+}
+
+.btn-delete-confirm:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.btn-delete-confirm:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.delete-confirm-input {
+  text-align: center;
+  font-size: 16px !important;
+  letter-spacing: 1px;
+}
+
+.delete-confirm-input:focus {
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* ───── Animations ───── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 16px 4px rgba(239, 68, 68, 0.1);
+  }
+}

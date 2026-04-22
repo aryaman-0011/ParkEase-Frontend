@@ -79,6 +79,11 @@ export class AuthService {
     return this.http.put<ApiMessageResponse>(`${this.apiUrl}/deactivate`, {});
   }
 
+  /** Permanently delete the user account and all associated data */
+  deleteAccount(): Observable<ApiMessageResponse> {
+    return this.http.delete<ApiMessageResponse>(`${this.apiUrl}/account`);
+  }
+
   /** Refresh JWT token */
   refreshToken(): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/refresh`, {}).pipe(

@@ -1,6 +1,6 @@
 <div class="min-h-screen bg-neutral-950 text-white">
   <!-- Nav -->
-  <nav class="border-b border-white/10 px-8 py-4 flex items-center justify-between">
+  <nav class="border-b border-white/10 px-4 sm:px-8 py-4 flex flex-wrap items-center justify-between gap-3">
     <a routerLink="/dashboard" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
       <div class="w-9 h-9 bg-white rounded-xl flex items-center justify-center">
         <span class="text-lg font-black text-neutral-900">P</span>
@@ -12,7 +12,7 @@
     </a>
   </nav>
 
-  <div class="max-w-3xl mx-auto px-6 py-12">
+  <div [class]="activeTab === 'danger' ? 'max-w-5xl mx-auto px-4 sm:px-6 py-12' : 'max-w-3xl mx-auto px-4 sm:px-6 py-12'">
     <h1 class="text-3xl font-bold mb-2">Settings</h1>
     <p class="text-neutral-500 mb-8">Manage your account preferences</p>
 
@@ -174,47 +174,160 @@
 
     <!-- Danger Zone Tab -->
     @if (activeTab === 'danger') {
-      <div class="card danger-card">
-        <div class="card-header">
-          <h2 class="text-lg font-semibold text-red-400">Deactivate Account</h2>
-          <p class="text-neutral-500 text-sm mt-1">Deactivate your account. Your data will be preserved but you will be unable to sign in until an admin reactivates your account.</p>
+      <div class="danger-grid">
+        <!-- Deactivate Account Card -->
+        <div class="card danger-card">
+          <div class="card-header">
+            <div class="flex items-center gap-3">
+              <div class="deactivate-icon-wrapper">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold text-amber-400">Deactivate Account</h2>
+                <p class="text-neutral-500 text-sm mt-1">Temporarily disable your account</p>
+              </div>
+            </div>
+          </div>
+          <div class="card-body danger-card-body">
+            <div class="bg-amber-500/5 border border-amber-500/15 rounded-xl p-4 mb-5">
+              <h3 class="text-white font-medium mb-3 text-sm">What happens:</h3>
+              <ul class="space-y-2 text-sm text-neutral-400">
+                <li class="flex items-start gap-2">
+                  <span class="text-amber-400 mt-0.5">&times;</span>
+                  Account deactivated immediately
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-amber-400 mt-0.5">&times;</span>
+                  Logged out and unable to sign in
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-emerald-400 mt-0.5">&#10003;</span>
+                  Data preserved — admin can restore
+                </li>
+              </ul>
+            </div>
+
+            <div class="danger-card-footer">
+              <label class="flex items-center gap-3 cursor-pointer mb-4 select-none">
+                <input type="checkbox" [(ngModel)]="confirmDeactivate" name="confirmDeactivate" class="w-4 h-4 rounded bg-white/5 border-white/20 accent-amber-500" />
+                <span class="text-sm text-neutral-400">I understand this will deactivate my account</span>
+              </label>
+
+              <button
+                (click)="onDeactivate()"
+                [disabled]="!confirmDeactivate || loading"
+                class="btn-danger"
+              >
+                @if (loading && !showDeleteModal) {
+                  <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                  Deactivating...
+                } @else {
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                  Deactivate Account
+                }
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="card-body">
-          <div class="bg-red-500/5 border border-red-500/15 rounded-xl p-5 mb-6">
-            <h3 class="text-white font-medium mb-3">What happens when you deactivate your account:</h3>
-            <ul class="space-y-2 text-sm text-neutral-400">
-              <li class="flex items-start gap-2">
-                <span class="text-red-400 mt-0.5">&times;</span>
-                Your account will be deactivated immediately
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-red-400 mt-0.5">&times;</span>
-                You will be logged out and unable to sign in
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-red-400 mt-0.5">&times;</span>
-                All active bookings will be cancelled
-              </li>
-            </ul>
+
+        <!-- Delete Account Card -->
+        <div class="card delete-card">
+          <div class="card-header">
+            <div class="flex items-center gap-3">
+              <div class="delete-icon-wrapper">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold text-red-400">Delete Account</h2>
+                <p class="text-neutral-500 text-sm mt-1">Permanently remove all your data</p>
+              </div>
+            </div>
+          </div>
+          <div class="card-body danger-card-body">
+            <div class="bg-red-500/5 border border-red-500/15 rounded-xl p-4 mb-5">
+              <h3 class="text-white font-medium mb-3 text-sm">This will permanently delete:</h3>
+              <ul class="space-y-2 text-sm text-neutral-400">
+                <li class="flex items-start gap-2">
+                  <svg class="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  Profile and personal information
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg class="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  Booking history and reservations
+                </li>
+                @if (user?.role === 'MANAGER') {
+                  <li class="flex items-start gap-2">
+                    <svg class="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    All managed parking lots
+                  </li>
+                }
+              </ul>
+            </div>
+
+            <div class="danger-card-footer">
+              <button
+                (click)="openDeleteModal()"
+                [disabled]="loading"
+                class="btn-delete"
+              >
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                Delete Account Permanently
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Delete Account Confirmation Modal -->
+    @if (showDeleteModal) {
+      <div class="modal-overlay" (click)="closeDeleteModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-icon-wrapper">
+            <svg class="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mt-4 mb-2">Are you absolutely sure?</h3>
+          <p class="text-neutral-400 text-sm mb-6">
+            This action <strong class="text-red-400">cannot be undone</strong>. This will permanently delete your account,
+            all personal data{{ user?.role === 'MANAGER' ? ', and all parking lots you manage' : '' }}.
+          </p>
+
+          @if (error && showDeleteModal) {
+            <div class="mb-4 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 flex items-center gap-3">
+              <svg class="w-5 h-5 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span class="text-red-400 text-sm">{{ error }}</span>
+            </div>
+          }
+
+          <div class="field" style="margin-bottom: 24px;">
+            <label class="label">Type <strong class="text-white">"yes"</strong> to confirm</label>
+            <input
+              type="text"
+              [(ngModel)]="deleteConfirmText"
+              name="deleteConfirmText"
+              placeholder="Type yes to confirm..."
+              class="input delete-confirm-input"
+              autocomplete="off"
+            />
           </div>
 
-          <label class="flex items-center gap-3 cursor-pointer mb-6 select-none">
-            <input type="checkbox" [(ngModel)]="confirmDeactivate" name="confirmDeactivate" class="w-4 h-4 rounded bg-white/5 border-white/20 accent-red-500" />
-            <span class="text-sm text-neutral-400">I understand that this action will deactivate my account</span>
-          </label>
-
-          <button
-            (click)="onDeactivate()"
-            [disabled]="!confirmDeactivate || loading"
-            class="btn-danger"
-          >
-            @if (loading) {
-              <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-              Deactivating...
-            } @else {
-              Deactivate My Account
-            }
-          </button>
+          <div class="modal-actions">
+            <button (click)="closeDeleteModal()" class="btn-cancel">
+              Cancel
+            </button>
+            <button
+              (click)="onDeleteAccount()"
+              [disabled]="loading || deleteConfirmText.trim().toLowerCase() !== 'yes'"
+              class="btn-delete-confirm"
+            >
+              @if (loading) {
+                <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                Deleting...
+              } @else {
+                Delete Account
+              }
+            </button>
+          </div>
         </div>
       </div>
     }

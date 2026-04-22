@@ -1,0 +1,268 @@
+<div class="min-h-screen bg-neutral-950 text-white">
+  <!-- Nav -->
+  <nav class="border-b border-white/10 px-4 sm:px-8 py-4 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 bg-white rounded-xl flex items-center justify-center">
+        <span class="text-lg font-black text-neutral-900">P</span>
+      </div>
+      <span class="text-lg font-bold tracking-tight">ParkEase</span>
+      @if (user?.role === 'ADMIN') {
+        <span class="role-badge badge-purple">Admin</span>
+      }
+      @if (user?.role === 'MANAGER') {
+        <span class="role-badge badge-amber">Manager</span>
+      }
+      @if (user?.role === 'DRIVER') {
+        <span class="role-badge badge-sky">Driver</span>
+      }
+    </div>
+    <div class="flex items-center gap-3">
+      @if (user?.role === 'DRIVER') {
+        <a routerLink="/lots/search" class="nav-btn">Find Parking</a>
+      }
+      @if (user?.role === 'MANAGER') {
+        <a routerLink="/manager/lots" class="nav-btn">My Lots</a>
+      }
+      @if (user?.role === 'ADMIN') {
+        <a routerLink="/admin/users" class="nav-btn">Users</a>
+        <a routerLink="/admin/lots" class="nav-btn">Lots</a>
+      }
+      <a routerLink="/settings" class="nav-btn">Settings</a>
+      <button (click)="logout()" class="nav-btn">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- Hero Banner -->
+  <div class="hero-banner">
+    <div class="hero-glow"></div>
+    <div class="max-w-6xl mx-auto px-8 py-14 relative z-10">
+      <div class="flex items-start justify-between">
+        <div>
+          <p class="text-neutral-500 text-sm font-medium tracking-wide uppercase mb-2">{{ getGreeting() }}</p>
+          <h1 class="text-5xl font-extrabold tracking-tight mb-2">{{ getFirstName() }}</h1>
+          <p class="text-neutral-500">{{ user?.email }} · <span class="text-neutral-600">{{ user?.provider }}</span></p>
+        </div>
+        <div class="hero-avatar">
+          <span class="text-2xl font-bold">{{ getInitials() }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-8 -mt-6 relative z-20 pb-16">
+
+    <!-- ═══════════════════ DRIVER ═══════════════════ -->
+    @if (user?.role === 'DRIVER') {
+      <!-- Stat Row -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div class="glass-card p-5 text-center">
+          <div class="text-3xl mb-2">🚗</div>
+          <p class="text-lg font-bold">{{ user?.vehiclePlate || '—' }}</p>
+          <p class="text-[11px] text-neutral-600 mt-1">Vehicle Plate</p>
+        </div>
+        <div class="glass-card p-5 text-center">
+          <div class="text-3xl mb-2">📱</div>
+          <p class="text-lg font-bold">{{ user?.phone || '—' }}</p>
+          <p class="text-[11px] text-neutral-600 mt-1">Phone</p>
+        </div>
+        <div class="glass-card p-5 text-center">
+          <div class="text-3xl mb-2">🔑</div>
+          <p class="text-lg font-bold capitalize">{{ user?.provider?.toLowerCase() }}</p>
+          <p class="text-[11px] text-neutral-600 mt-1">Login Method</p>
+        </div>
+        <div class="glass-card p-5 text-center">
+          <div class="text-3xl mb-2">✅</div>
+          <p class="text-lg font-bold text-emerald-400">Active</p>
+          <p class="text-[11px] text-neutral-600 mt-1">Account Status</p>
+        </div>
+      </div>
+
+      <!-- Big action cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <a routerLink="/lots/search" class="big-action-card group bg-gradient-to-br from-sky-500/8 via-transparent to-transparent border-sky-500/10 hover:border-sky-500/25">
+          <div class="big-action-icon bg-sky-500/10 group-hover:bg-sky-500/20">
+            <svg class="w-7 h-7 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+          </div>
+          <div>
+            <p class="text-lg font-semibold mb-1">Find Parking</p>
+            <p class="text-sm text-neutral-500">Search nearby lots, browse by city, and reserve your spot in seconds</p>
+          </div>
+          <svg class="w-5 h-5 text-neutral-700 group-hover:text-sky-400 transition-colors ml-auto shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </a>
+        <a routerLink="/settings" class="big-action-card group bg-gradient-to-br from-white/[0.03] via-transparent to-transparent">
+          <div class="big-action-icon bg-white/5 group-hover:bg-white/10">
+            <svg class="w-7 h-7 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+          </div>
+          <div>
+            <p class="text-lg font-semibold mb-1">My Profile</p>
+            <p class="text-sm text-neutral-500">Update your details, change password, manage your account</p>
+          </div>
+          <svg class="w-5 h-5 text-neutral-700 group-hover:text-neutral-400 transition-colors ml-auto shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </a>
+      </div>
+
+      <!-- Tips -->
+      <div class="glass-card p-6">
+        <p class="text-sm font-semibold text-neutral-300 mb-4">💡 Quick Tips</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="tip-item"><span class="tip-num">01</span><p class="tip-text">Use "Find Parking" to search lots near your current location or by city name</p></div>
+          <div class="tip-item"><span class="tip-num">02</span><p class="tip-text">Check real-time availability before you drive — see which spots are free right now</p></div>
+          <div class="tip-item"><span class="tip-num">03</span><p class="tip-text">Add your vehicle plate in Settings for faster bookings in the future</p></div>
+        </div>
+      </div>
+    }
+
+    <!-- ═══════════════════ MANAGER ═══════════════════ -->
+    @if (user?.role === 'MANAGER') {
+      <!-- Stats -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div class="glass-card p-5 text-center">
+          <p class="text-3xl font-extrabold">{{ managerLots.length }}</p>
+          <p class="text-[11px] text-neutral-600 mt-1">Total Lots</p>
+        </div>
+        <div class="glass-card p-5 text-center">
+          <p class="text-3xl font-extrabold text-emerald-400">{{ getOpenLots() }}</p>
+          <p class="text-[11px] text-neutral-600 mt-1">Open Now</p>
+        </div>
+        <div class="glass-card p-5 text-center">
+          <p class="text-3xl font-extrabold">{{ managerTotalSpots }}</p>
+          <p class="text-[11px] text-neutral-600 mt-1">Total Spots</p>
+        </div>
+        <div class="glass-card p-5 text-center">
+          <p class="text-3xl font-extrabold text-amber-400">{{ getOccupancyRate() }}<span class="text-lg">%</span></p>
+          <p class="text-[11px] text-neutral-600 mt-1">Occupancy Rate</p>
+        </div>
+      </div>
+
+      <!-- Lot list -->
+      <div class="glass-card p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+          <p class="text-sm font-semibold text-neutral-300">Your Parking Lots</p>
+          <a routerLink="/manager/lots" class="text-xs text-amber-400/60 hover:text-amber-400 transition-colors">Manage all →</a>
+        </div>
+        @if (managerLots.length === 0) {
+          <div class="text-center py-8">
+            <p class="text-3xl mb-3">🏗️</p>
+            <p class="text-neutral-500 text-sm">No lots yet</p>
+            <a routerLink="/manager/lots" class="inline-block mt-3 text-sm text-amber-400 hover:underline">Create your first lot →</a>
+          </div>
+        }
+        @if (managerLots.length > 0) {
+          <div class="space-y-2">
+            @for (lot of managerLots; track lot.id) {
+              <a [routerLink]="['/manager/lots', lot.id, 'spots']" class="lot-row group">
+                <div class="flex items-center gap-3 min-w-0">
+                  <span class="w-2 h-2 rounded-full shrink-0" [class]="lot.approved && lot.open ? 'bg-emerald-400' : lot.approved ? 'bg-red-400' : 'bg-yellow-400'"></span>
+                  <div class="min-w-0">
+                    <p class="font-medium text-sm truncate group-hover:text-white transition-colors">{{ lot.name }}</p>
+                    <p class="text-[11px] text-neutral-700 truncate">{{ lot.city }}{{ lot.state ? ', ' + lot.state : '' }}</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-5 shrink-0">
+                  <div class="text-right hidden sm:block">
+                    <p class="text-sm font-medium">{{ lot.availableSpots }}<span class="text-neutral-600">/{{ lot.totalSpots }}</span></p>
+                    <p class="text-[10px] text-neutral-700">available</p>
+                  </div>
+                  <div class="text-right hidden sm:block">
+                    <p class="text-sm font-medium">₹{{ lot.pricePerHour }}</p>
+                    <p class="text-[10px] text-neutral-700">/hour</p>
+                  </div>
+                  <svg class="w-4 h-4 text-neutral-800 group-hover:text-neutral-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                </div>
+              </a>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Actions -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <a routerLink="/manager/lots" class="big-action-card group bg-gradient-to-br from-amber-500/8 via-transparent to-transparent border-amber-500/10 hover:border-amber-500/25">
+          <div class="big-action-icon bg-amber-500/10 group-hover:bg-amber-500/20">
+            <svg class="w-7 h-7 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          </div>
+          <div>
+            <p class="text-lg font-semibold mb-1">Create & Manage</p>
+            <p class="text-sm text-neutral-500">Add new lots, configure spots, set pricing</p>
+          </div>
+          <svg class="w-5 h-5 text-neutral-700 group-hover:text-amber-400 transition-colors ml-auto shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </a>
+        <a routerLink="/settings" class="big-action-card group bg-gradient-to-br from-white/[0.03] via-transparent to-transparent">
+          <div class="big-action-icon bg-white/5 group-hover:bg-white/10">
+            <svg class="w-7 h-7 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+          </div>
+          <div>
+            <p class="text-lg font-semibold mb-1">Account Settings</p>
+            <p class="text-sm text-neutral-500">Update profile, manage your account</p>
+          </div>
+          <svg class="w-5 h-5 text-neutral-700 group-hover:text-neutral-400 transition-colors ml-auto shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </a>
+      </div>
+    }
+
+    <!-- ═══════════════════ ADMIN ═══════════════════ -->
+    @if (user?.role === 'ADMIN') {
+      <!-- Stats -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div class="glass-card p-5 text-center">
+          <p class="text-3xl font-extrabold">{{ adminStats?.totalUsers || 0 }}</p>
+          <p class="text-[11px] text-neutral-600 mt-1">Total Users</p>
+        </div>
+        <div class="glass-card p-5 text-center">
+          <p class="text-3xl font-extrabold text-amber-400">{{ adminStats?.totalManagers || 0 }}</p>
+          <p class="text-[11px] text-neutral-600 mt-1">Managers</p>
+        </div>
+        <div class="glass-card p-5 text-center">
+          <p class="text-3xl font-extrabold">{{ totalLots }}</p>
+          <p class="text-[11px] text-neutral-600 mt-1">Registered Lots</p>
+        </div>
+        <div class="glass-card p-5 text-center">
+          <p class="text-3xl font-extrabold" [class]="pendingCount > 0 ? 'text-yellow-400' : 'text-emerald-400'">{{ pendingCount }}</p>
+          <p class="text-[11px] text-neutral-600 mt-1">Pending Approvals</p>
+        </div>
+      </div>
+
+      <!-- Breakdown -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <div class="glass-card p-6">
+          <p class="text-sm font-semibold text-neutral-300 mb-4">Users by Role</p>
+          <div class="space-y-3">
+            <div class="breakdown-row"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-sky-400"></span><span>Drivers</span></div><span class="font-semibold">{{ adminStats?.totalDrivers || 0 }}</span></div>
+            <div class="breakdown-row"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-400"></span><span>Managers</span></div><span class="font-semibold">{{ adminStats?.totalManagers || 0 }}</span></div>
+            <div class="breakdown-row"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-purple-400"></span><span>Admins</span></div><span class="font-semibold">{{ adminStats?.totalAdmins || 0 }}</span></div>
+          </div>
+        </div>
+        <div class="glass-card p-6">
+          <p class="text-sm font-semibold text-neutral-300 mb-4">Account Health</p>
+          <div class="space-y-3">
+            <div class="breakdown-row"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span><span>Active Accounts</span></div><span class="font-semibold text-emerald-400">{{ adminStats?.activeUsers || 0 }}</span></div>
+            <div class="breakdown-row"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-400"></span><span>Suspended</span></div><span class="font-semibold text-red-400">{{ adminStats?.inactiveUsers || 0 }}</span></div>
+            <div class="breakdown-row border-t border-white/5 pt-3"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-yellow-400"></span><span>Pending Lot Approvals</span></div><span class="font-semibold text-yellow-400">{{ pendingCount }}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <a routerLink="/admin/users" class="big-action-card group bg-gradient-to-br from-purple-500/8 via-transparent to-transparent border-purple-500/10 hover:border-purple-500/25">
+          <div class="big-action-icon bg-purple-500/10 group-hover:bg-purple-500/20">
+            <svg class="w-6 h-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+          </div>
+          <div><p class="font-semibold mb-1">Manage Users</p><p class="text-xs text-neutral-500">View, suspend, roles</p></div>
+        </a>
+        <a routerLink="/admin/lots" class="big-action-card group bg-gradient-to-br from-amber-500/8 via-transparent to-transparent border-amber-500/10 hover:border-amber-500/25">
+          <div class="big-action-icon bg-amber-500/10 group-hover:bg-amber-500/20">
+            <svg class="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z"/></svg>
+          </div>
+          <div><p class="font-semibold mb-1">Lot Management</p><p class="text-xs text-neutral-500">Approvals & manage</p></div>
+        </a>
+        <a routerLink="/settings" class="big-action-card group bg-gradient-to-br from-white/[0.03] via-transparent to-transparent">
+          <div class="big-action-icon bg-white/5 group-hover:bg-white/10">
+            <svg class="w-6 h-6 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <div><p class="font-semibold mb-1">Settings</p><p class="text-xs text-neutral-500">Account & profile</p></div>
+        </a>
+      </div>
+    }
+  </div>
+</div>
