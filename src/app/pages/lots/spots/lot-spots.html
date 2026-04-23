@@ -1,11 +1,5 @@
 <div class="min-h-screen bg-neutral-950 text-white">
-  <nav class="border-b border-white/10 px-4 sm:px-8 py-4 flex flex-wrap items-center justify-between gap-3">
-    <a routerLink="/lots/search" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-      <svg class="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
-      <span class="text-neutral-400 text-sm">Back to Search</span>
-    </a>
-    <a routerLink="/dashboard" class="text-sm text-neutral-500 hover:text-white transition-colors">Dashboard</a>
-  </nav>
+  <app-navbar></app-navbar>
 
   <div class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
 
@@ -65,6 +59,55 @@
       </div>
     }
 
+    <!-- Booking Messages -->
+    @if (bookingMessage) {
+      <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-5 py-3 mb-6 text-sm text-emerald-400">
+        ✅ {{ bookingMessage }}
+      </div>
+    }
+    @if (bookingError) {
+      <div class="bg-red-500/10 border border-red-500/20 rounded-xl px-5 py-3 mb-6 text-sm text-red-400">
+        ⚠️ {{ bookingError }}
+      </div>
+    }
+
+    <!-- Active Booking Card -->
+    @if (activeBooking) {
+      <div class="booking-card mb-6">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full" [class]="activeBooking.status === 'RESERVED' ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400 animate-pulse'"></span>
+            <span class="text-sm font-semibold">{{ activeBooking.status === 'RESERVED' ? 'Reserved' : 'Checked In' }}</span>
+          </div>
+          <span class="text-xs text-neutral-500">Booking #{{ activeBooking.bookingId }}</span>
+        </div>
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-12 h-12 bg-white/[0.04] border border-white/[0.08] rounded-xl flex items-center justify-center">
+            <span class="text-lg font-bold">{{ activeBooking.spotNumber }}</span>
+          </div>
+          <div>
+            <p class="text-sm font-medium">{{ activeBooking.lotName }}</p>
+            <p class="text-xs text-neutral-500">₹{{ activeBooking.pricePerHour }}/hr · {{ activeBooking.vehiclePlate || 'No plate' }}</p>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          @if (activeBooking.status === 'RESERVED') {
+            <button (click)="checkIn()" [disabled]="bookingLoading" class="booking-btn booking-btn-primary flex-1">
+              {{ bookingLoading ? 'Processing...' : '✓ Check In' }}
+            </button>
+            <button (click)="cancelBooking()" [disabled]="bookingLoading" class="booking-btn booking-btn-cancel flex-1">
+              {{ bookingLoading ? '...' : '✕ Cancel' }}
+            </button>
+          }
+          @if (activeBooking.status === 'ACTIVE') {
+            <button (click)="checkOut()" [disabled]="bookingLoading" class="booking-btn booking-btn-checkout flex-1">
+              {{ bookingLoading ? 'Processing...' : '🚗 Check Out' }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+
     <!-- Content based on whether individual spots exist -->
     @if (!loading && counts && counts.total > 0) {
       <!-- Type Filters -->
@@ -81,14 +124,18 @@
       @if (filteredSpots.length > 0) {
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           @for (spot of filteredSpots; track spot.spotId) {
-            <div class="spot-tile">
-              <!-- Number + dot -->
+            <div class="spot-tile" [class.spot-reserved]="spot.status === 'RESERVED'" [class.spot-occupied]="spot.status === 'OCCUPIED'">
+              <!-- Number + status dot -->
               <div class="flex items-center justify-between mb-1">
                 <span class="text-[15px] font-bold tracking-wide text-white">{{ spot.spotNumber }}</span>
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span class="w-1.5 h-1.5 rounded-full"
+                  [class]="spot.status === 'AVAILABLE' ? 'bg-emerald-400' : spot.status === 'RESERVED' ? 'bg-amber-400' : 'bg-red-400'"></span>
               </div>
 
-              <p class="text-[10px] font-medium uppercase tracking-widest text-emerald-500 mb-3">Available</p>
+              <p class="text-[10px] font-medium uppercase tracking-widest mb-3"
+                [class]="spot.status === 'AVAILABLE' ? 'text-emerald-500' : spot.status === 'RESERVED' ? 'text-amber-500' : 'text-red-500'">
+                {{ spot.status }}
+              </p>
 
               <!-- Info -->
               <div class="text-[11px] text-neutral-600 space-y-1">
@@ -105,6 +152,14 @@
                   </div>
                 }
               </div>
+
+              <!-- Book button (only for available spots) -->
+              @if (spot.status === 'AVAILABLE') {
+                <button (click)="bookSpot(spot)" [disabled]="bookingLoading || !!activeBooking"
+                  class="book-spot-btn" [class.opacity-50]="!!activeBooking">
+                  {{ activeBooking ? 'Booking Active' : 'Book This Spot' }}
+                </button>
+              }
             </div>
           }
         </div>

@@ -5,11 +5,12 @@ import { LotService } from '../../../services/lot.service';
 import { AdminService } from '../../../services/admin.service';
 import { LotResponse } from '../../../models/lot.model';
 import { AdminUserResponse } from '../../../models/admin.model';
+import { NavbarComponent } from '../../../components/navbar/navbar';
 
 @Component({
   selector: 'app-admin-lots',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, NavbarComponent],
   templateUrl: './admin-lots.html',
   styleUrl: './admin-lots.css',
 })

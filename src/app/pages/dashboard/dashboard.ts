@@ -4,14 +4,17 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { AdminService } from '../../services/admin.service';
 import { LotService } from '../../services/lot.service';
+import { BookingService } from '../../services/booking.service';
 import { UserResponse } from '../../models/auth.model';
 import { UserStatsResponse } from '../../models/admin.model';
 import { LotResponse } from '../../models/lot.model';
+import { BookingResponse } from '../../models/booking.model';
+import { NavbarComponent } from '../../components/navbar/navbar';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, NavbarComponent],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -23,6 +26,10 @@ export class DashboardComponent implements OnInit {
   managerTotalSpots = 0;
   managerAvailableSpots = 0;
 
+  // Driver data
+  activeBooking: BookingResponse | null = null;
+  recentBookings: BookingResponse[] = [];
+
   // Admin data
   adminStats: UserStatsResponse | null = null;
   pendingCount = 0;
@@ -32,6 +39,7 @@ export class DashboardComponent implements OnInit {
     private authService: AuthService,
     private adminService: AdminService,
     private lotService: LotService,
+    private bookingService: BookingService,
     private router: Router,
     private cdr: ChangeDetectorRef,
   ) {}
@@ -50,6 +58,9 @@ export class DashboardComponent implements OnInit {
     }
     if (this.user?.role === 'ADMIN') {
       this.loadAdminData();
+    }
+    if (this.user?.role === 'DRIVER') {
+      this.loadDriverData();
     }
   }
 
@@ -80,6 +91,23 @@ export class DashboardComponent implements OnInit {
     this.lotService.getAllLots().subscribe({
       next: (lots: LotResponse[]) => {
         this.totalLots = lots.length;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  private loadDriverData(): void {
+    if (!this.user) return;
+    this.bookingService.getActiveBooking(this.user.id).subscribe({
+      next: (b: BookingResponse) => {
+        this.activeBooking = b;
+        this.cdr.detectChanges();
+      },
+      error: () => { this.activeBooking = null; },
+    });
+    this.bookingService.getUserBookings(this.user.id).subscribe({
+      next: (bookings: BookingResponse[]) => {
+        this.recentBookings = bookings.slice(0, 5);
         this.cdr.detectChanges();
       },
     });

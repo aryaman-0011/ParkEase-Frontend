@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { LotService } from '../../../services/lot.service';
 import { LotResponse } from '../../../models/lot.model';
+import { NavbarComponent } from '../../../components/navbar/navbar';
 
 @Component({
   selector: 'app-search-lots',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, NavbarComponent],
   templateUrl: './search-lots.html',
   styleUrl: './search-lots.css',
 })

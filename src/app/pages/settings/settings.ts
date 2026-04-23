@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { UserResponse } from '../../models/auth.model';
+import { NavbarComponent } from '../../components/navbar/navbar';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, NavbarComponent],
   templateUrl: './settings.html',
   styleUrl: './settings.css',
 })

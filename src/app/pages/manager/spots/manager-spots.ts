@@ -6,11 +6,12 @@ import { SpotService } from '../../../services/spot.service';
 import { LotService } from '../../../services/lot.service';
 import { SpotResponse, SpotCountResponse, SpotType, VehicleType } from '../../../models/spot.model';
 import { LotResponse } from '../../../models/lot.model';
+import { NavbarComponent } from '../../../components/navbar/navbar';
 
 @Component({
   selector: 'app-manager-spots',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, NavbarComponent],
   templateUrl: './manager-spots.html',
   styleUrl: './manager-spots.css',
 })

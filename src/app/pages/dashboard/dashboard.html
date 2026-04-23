@@ -1,36 +1,5 @@
 <div class="min-h-screen bg-neutral-950 text-white">
-  <!-- Nav -->
-  <nav class="border-b border-white/10 px-4 sm:px-8 py-4 flex flex-wrap items-center justify-between gap-3">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 bg-white rounded-xl flex items-center justify-center">
-        <span class="text-lg font-black text-neutral-900">P</span>
-      </div>
-      <span class="text-lg font-bold tracking-tight">ParkEase</span>
-      @if (user?.role === 'ADMIN') {
-        <span class="role-badge badge-purple">Admin</span>
-      }
-      @if (user?.role === 'MANAGER') {
-        <span class="role-badge badge-amber">Manager</span>
-      }
-      @if (user?.role === 'DRIVER') {
-        <span class="role-badge badge-sky">Driver</span>
-      }
-    </div>
-    <div class="flex items-center gap-3">
-      @if (user?.role === 'DRIVER') {
-        <a routerLink="/lots/search" class="nav-btn">Find Parking</a>
-      }
-      @if (user?.role === 'MANAGER') {
-        <a routerLink="/manager/lots" class="nav-btn">My Lots</a>
-      }
-      @if (user?.role === 'ADMIN') {
-        <a routerLink="/admin/users" class="nav-btn">Users</a>
-        <a routerLink="/admin/lots" class="nav-btn">Lots</a>
-      }
-      <a routerLink="/settings" class="nav-btn">Settings</a>
-      <button (click)="logout()" class="nav-btn">Sign Out</button>
-    </div>
-  </nav>
+  <app-navbar></app-navbar>
 
   <!-- Hero Banner -->
   <div class="hero-banner">
@@ -76,6 +45,54 @@
           <p class="text-[11px] text-neutral-600 mt-1">Account Status</p>
         </div>
       </div>
+
+      <!-- Active Booking -->
+      @if (activeBooking) {
+        <div class="glass-card p-6 mb-6 border-emerald-500/10">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="w-2 h-2 rounded-full animate-pulse" [class]="activeBooking.status === 'RESERVED' ? 'bg-amber-400' : 'bg-emerald-400'"></span>
+            <p class="text-sm font-semibold text-neutral-300">{{ activeBooking.status === 'RESERVED' ? 'Reserved' : 'Checked In' }}</p>
+            <span class="text-xs text-neutral-600 ml-auto">#{{ activeBooking.bookingId }}</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 bg-white/[0.04] border border-white/[0.08] rounded-xl flex items-center justify-center">
+              <span class="text-xl font-bold">{{ activeBooking.spotNumber }}</span>
+            </div>
+            <div>
+              <p class="font-semibold">{{ activeBooking.lotName }}</p>
+              <p class="text-xs text-neutral-500">₹{{ activeBooking.pricePerHour }}/hr · {{ activeBooking.vehiclePlate || 'No plate' }}</p>
+            </div>
+            <a [routerLink]="['/lots', activeBooking.lotId, 'spots']" class="ml-auto text-xs text-emerald-400 hover:underline">Manage →</a>
+          </div>
+        </div>
+      }
+
+      <!-- Recent Bookings -->
+      @if (recentBookings.length > 0) {
+        <div class="glass-card p-6 mb-6">
+          <p class="text-sm font-semibold text-neutral-300 mb-4">📋 Recent Bookings</p>
+          <div class="space-y-2">
+            @for (b of recentBookings; track b.bookingId) {
+              <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                <div class="flex items-center gap-3">
+                  <span class="text-sm font-bold text-neutral-400">{{ b.spotNumber }}</span>
+                  <div>
+                    <p class="text-xs text-neutral-300">{{ b.lotName }}</p>
+                    <p class="text-[10px] text-neutral-600">{{ b.createdAt | date:'MMM d, h:mm a' }}</p>
+                  </div>
+                </div>
+                <span class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md"
+                  [class]="b.status === 'COMPLETED' ? 'bg-emerald-500/10 text-emerald-400' :
+                           b.status === 'CANCELLED' ? 'bg-red-500/10 text-red-400' :
+                           b.status === 'ACTIVE' ? 'bg-sky-500/10 text-sky-400' :
+                           'bg-amber-500/10 text-amber-400'">
+                  {{ b.status }}
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      }
 
       <!-- Big action cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">

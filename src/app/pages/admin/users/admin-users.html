@@ -1,22 +1,5 @@
 <div class="min-h-screen bg-neutral-950 text-white">
-  <!-- Nav -->
-  <nav class="border-b border-white/10 px-4 sm:px-8 py-4 flex flex-wrap items-center justify-between gap-3">
-    <a routerLink="/dashboard" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-      <div class="w-9 h-9 bg-white rounded-xl flex items-center justify-center">
-        <span class="text-lg font-black text-neutral-900">P</span>
-      </div>
-      <span class="text-lg font-bold tracking-tight">ParkEase</span>
-      <span class="text-xs bg-white/10 text-neutral-400 px-2.5 py-1 rounded-lg border border-white/5 ml-1">Admin</span>
-    </a>
-    <div class="flex items-center gap-3">
-      <a routerLink="/dashboard" class="text-sm text-neutral-400 hover:text-white border border-white/10 px-4 py-2 rounded-lg hover:bg-white/5 transition-all">
-        &larr; Dashboard
-      </a>
-      <button (click)="logout()" class="text-sm text-neutral-400 hover:text-white border border-white/10 px-4 py-2 rounded-lg hover:bg-white/5 transition-all">
-        Sign Out
-      </button>
-    </div>
-  </nav>
+  <app-navbar></app-navbar>
 
   <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
     <!-- Header -->

@@ -8,11 +8,12 @@ import {
   AdminUserResponse,
   UserStatsResponse,
 } from '../../../models/admin.model';
+import { NavbarComponent } from '../../../components/navbar/navbar';
 
 @Component({
   selector: 'app-admin-users',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, NavbarComponent],
   templateUrl: './admin-users.html',
   styleUrl: './admin-users.css',
 })

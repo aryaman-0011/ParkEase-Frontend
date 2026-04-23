@@ -1,16 +1,5 @@
 <div class="min-h-screen bg-neutral-950 text-white">
-  <!-- Nav -->
-  <nav class="border-b border-white/10 px-4 sm:px-8 py-4 flex flex-wrap items-center justify-between gap-3">
-    <a routerLink="/dashboard" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-      <div class="w-9 h-9 bg-white rounded-xl flex items-center justify-center">
-        <span class="text-lg font-black text-neutral-900">P</span>
-      </div>
-      <span class="text-lg font-bold tracking-tight">ParkEase</span>
-    </a>
-    <a routerLink="/dashboard" class="text-sm text-neutral-400 hover:text-white border border-white/10 px-4 py-2 rounded-lg hover:bg-white/5 transition-all">
-      &larr; Back to Dashboard
-    </a>
-  </nav>
+  <app-navbar></app-navbar>
 
   <div [class]="activeTab === 'danger' ? 'max-w-5xl mx-auto px-4 sm:px-6 py-12' : 'max-w-3xl mx-auto px-4 sm:px-6 py-12'">
     <h1 class="text-3xl font-bold mb-2">Settings</h1>
