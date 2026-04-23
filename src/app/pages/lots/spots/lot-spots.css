@@ -139,3 +139,93 @@
 }
 .book-spot-btn:hover:not(:disabled) { background: rgba(34,197,94,0.15); }
 .book-spot-btn:disabled { cursor: not-allowed; }
+
+/* ───── Receipt Modal ───── */
+.receipt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+.receipt-card {
+  width: 100%;
+  max-width: 380px;
+  margin: 16px;
+  padding: 28px 24px;
+  border-radius: 18px;
+  background: #1a1918;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  animation: slideUp 0.25s ease;
+}
+.receipt-rows {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 16px;
+  margin-bottom: 20px;
+}
+.receipt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 13px;
+}
+.receipt-row + .receipt-row {
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+.receipt-close-btn {
+  width: 100%;
+  padding: 12px 0;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  background: rgba(34,197,94,0.12);
+  color: #22c55e;
+  border: 1px solid rgba(34,197,94,0.2);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.receipt-close-btn:hover { background: rgba(34,197,94,0.2); }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ───── Payment Method Buttons ───── */
+.pay-method-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pay-method-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+.pay-cash:hover {
+  background: rgba(34,197,94,0.08);
+  border-color: rgba(34,197,94,0.2);
+}
+.pay-online:hover {
+  background: rgba(59,130,246,0.08);
+  border-color: rgba(59,130,246,0.2);
+}

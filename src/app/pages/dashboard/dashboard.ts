@@ -5,10 +5,12 @@ import { AuthService } from '../../services/auth.service';
 import { AdminService } from '../../services/admin.service';
 import { LotService } from '../../services/lot.service';
 import { BookingService } from '../../services/booking.service';
+import { PaymentService } from '../../services/payment.service';
 import { UserResponse } from '../../models/auth.model';
 import { UserStatsResponse } from '../../models/admin.model';
 import { LotResponse } from '../../models/lot.model';
 import { BookingResponse } from '../../models/booking.model';
+import { PaymentResponse } from '../../models/payment.model';
 import { NavbarComponent } from '../../components/navbar/navbar';
 
 @Component({
@@ -29,6 +31,8 @@ export class DashboardComponent implements OnInit {
   // Driver data
   activeBooking: BookingResponse | null = null;
   recentBookings: BookingResponse[] = [];
+  totalSpent = 0;
+  recentPayments: PaymentResponse[] = [];
 
   // Admin data
   adminStats: UserStatsResponse | null = null;
@@ -40,6 +44,7 @@ export class DashboardComponent implements OnInit {
     private adminService: AdminService,
     private lotService: LotService,
     private bookingService: BookingService,
+    private paymentService: PaymentService,
     private router: Router,
     private cdr: ChangeDetectorRef,
   ) {}
@@ -108,6 +113,18 @@ export class DashboardComponent implements OnInit {
     this.bookingService.getUserBookings(this.user.id).subscribe({
       next: (bookings: BookingResponse[]) => {
         this.recentBookings = bookings.slice(0, 5);
+        this.cdr.detectChanges();
+      },
+    });
+    this.paymentService.getTotalSpent(this.user.id).subscribe({
+      next: (res: { userId: number; totalSpent: number }) => {
+        this.totalSpent = res.totalSpent;
+        this.cdr.detectChanges();
+      },
+    });
+    this.paymentService.getUserPayments(this.user.id).subscribe({
+      next: (payments: PaymentResponse[]) => {
+        this.recentPayments = payments.slice(0, 5);
         this.cdr.detectChanges();
       },
     });

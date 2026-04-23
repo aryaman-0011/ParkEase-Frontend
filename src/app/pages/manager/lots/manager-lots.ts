@@ -108,10 +108,12 @@ export class ManagerLotsComponent implements OnInit {
 
     if (!this.form.name || !this.form.address || !this.form.city) {
       this.formError = 'Name, address, and city are required';
+      setTimeout(() => { this.formError = ''; this.cdr.detectChanges(); }, 6000);
       return;
     }
     if (!this.form.latitude || !this.form.longitude) {
       this.formError = 'Latitude and longitude are required';
+      setTimeout(() => { this.formError = ''; this.cdr.detectChanges(); }, 6000);
       return;
     }
 
@@ -141,17 +143,20 @@ export class ManagerLotsComponent implements OnInit {
           this.formLoading = false;
           this.formError = err.error?.message || 'Failed to update lot';
           this.cdr.detectChanges();
+          setTimeout(() => { this.formError = ''; this.cdr.detectChanges(); }, 6000);
         },
       });
     } else {
       if (!this.form.totalSpots || this.form.totalSpots < 1) {
         this.formError = 'Total spots must be at least 1';
         this.formLoading = false;
+        setTimeout(() => { this.formError = ''; this.cdr.detectChanges(); }, 6000);
         return;
       }
       if (!this.form.pricePerHour || this.form.pricePerHour <= 0) {
         this.formError = 'Price per hour must be greater than 0';
         this.formLoading = false;
+        setTimeout(() => { this.formError = ''; this.cdr.detectChanges(); }, 6000);
         return;
       }
 
@@ -176,8 +181,9 @@ export class ManagerLotsComponent implements OnInit {
         },
         error: (err) => {
           this.formLoading = false;
-          this.cdr.detectChanges();
           this.formError = err.error?.message || 'Failed to create lot';
+          this.cdr.detectChanges();
+          setTimeout(() => { this.formError = ''; this.cdr.detectChanges(); }, 6000);
         },
       });
     }

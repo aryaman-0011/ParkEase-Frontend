@@ -1,0 +1,118 @@
+<div class="min-h-screen bg-neutral-950 text-white">
+  <app-navbar></app-navbar>
+
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-2xl font-bold tracking-tight mb-1">My Payments</h1>
+      <p class="text-neutral-500 text-sm">View your complete payment history and receipts</p>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+      <div class="stat-card">
+        <p class="stat-value text-amber-400">₹{{ totalSpent.toFixed(0) }}</p>
+        <p class="stat-label">Total Spent</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-value">{{ payments.length }}</p>
+        <p class="stat-label">Total Transactions</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-value text-emerald-400">{{ successCount }}</p>
+        <p class="stat-label">Successful</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-value text-red-400">{{ refundedCount }}</p>
+        <p class="stat-label">Refunded</p>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
+      <button (click)="filterStatus = 'ALL'" [class]="filterStatus === 'ALL' ? 'filter-pill filter-active' : 'filter-pill'">All</button>
+      <button (click)="filterStatus = 'SUCCESS'" [class]="filterStatus === 'SUCCESS' ? 'filter-pill filter-active' : 'filter-pill'">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block mr-1"></span> Success
+      </button>
+      <button (click)="filterStatus = 'PENDING'" [class]="filterStatus === 'PENDING' ? 'filter-pill filter-active' : 'filter-pill'">
+        <span class="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block mr-1"></span> Pending
+      </button>
+      <button (click)="filterStatus = 'REFUNDED'" [class]="filterStatus === 'REFUNDED' ? 'filter-pill filter-active' : 'filter-pill'">
+        <span class="w-1.5 h-1.5 rounded-full bg-sky-400 inline-block mr-1"></span> Refunded
+      </button>
+      <button (click)="filterStatus = 'FAILED'" [class]="filterStatus === 'FAILED' ? 'filter-pill filter-active' : 'filter-pill'">
+        <span class="w-1.5 h-1.5 rounded-full bg-red-400 inline-block mr-1"></span> Failed
+      </button>
+    </div>
+
+    <!-- Payment List -->
+    @if (!loading && filteredPayments.length > 0) {
+      <div class="space-y-3">
+        @for (p of filteredPayments; track p.paymentId) {
+          <div class="payment-card">
+            <div class="flex items-center gap-4">
+              <!-- Method Icon -->
+              <div class="pay-icon">
+                <span class="text-xl">{{ getMethodIcon(p.paymentMethod) }}</span>
+              </div>
+
+              <!-- Details -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                  <p class="text-sm font-semibold truncate">{{ p.description || 'Parking fee' }}</p>
+                  <span class="status-badge"
+                    [class]="p.status === 'SUCCESS' ? 'status-success' :
+                             p.status === 'REFUNDED' ? 'status-refunded' :
+                             p.status === 'FAILED' ? 'status-failed' :
+                             'status-pending'">
+                    {{ p.status }}
+                  </span>
+                </div>
+                <div class="flex items-center gap-3 text-[11px] text-neutral-600">
+                  <span class="font-mono">{{ p.receiptNumber }}</span>
+                  <span>·</span>
+                  <span>{{ p.paidAt | date:'MMM d, yyyy · h:mm a' }}</span>
+                </div>
+              </div>
+
+              <!-- Amount -->
+              <div class="text-right shrink-0">
+                <p class="text-lg font-bold" [class]="p.status === 'REFUNDED' ? 'text-sky-400' : 'text-white'">
+                  {{ p.status === 'REFUNDED' ? '-' : '' }}₹{{ p.amount.toFixed(2) }}
+                </p>
+                <p class="text-[10px] text-neutral-600 font-mono">{{ p.transactionId }}</p>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Empty State -->
+    @if (!loading && filteredPayments.length === 0) {
+      <div class="text-center py-20">
+        <div class="w-20 h-20 bg-white/[0.03] border border-white/[0.06] rounded-2xl flex items-center justify-center mx-auto mb-5">
+          <span class="text-4xl">💳</span>
+        </div>
+        @if (filterStatus !== 'ALL') {
+          <p class="text-neutral-400 text-lg font-medium">No {{ filterStatus.toLowerCase() }} payments</p>
+          <p class="text-neutral-600 text-sm mt-1">Try selecting a different filter</p>
+        } @else {
+          <p class="text-neutral-400 text-lg font-medium">No payments yet</p>
+          <p class="text-neutral-600 text-sm mt-1">Book a parking spot and complete checkout to see your payment history</p>
+          <a routerLink="/lots/search" class="inline-block mt-4 text-sm text-sky-400 hover:underline">Find Parking →</a>
+        }
+      </div>
+    }
+
+    <!-- Loading Skeleton -->
+    @if (loading) {
+      <div class="space-y-3">
+        @for (i of [1,2,3,4,5]; track i) {
+          <div class="payment-skeleton"></div>
+        }
+      </div>
+    }
+  </div>
+</div>

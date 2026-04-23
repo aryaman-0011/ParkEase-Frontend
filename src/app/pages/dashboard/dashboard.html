@@ -40,9 +40,9 @@
           <p class="text-[11px] text-neutral-600 mt-1">Login Method</p>
         </div>
         <div class="glass-card p-5 text-center">
-          <div class="text-3xl mb-2">✅</div>
-          <p class="text-lg font-bold text-emerald-400">Active</p>
-          <p class="text-[11px] text-neutral-600 mt-1">Account Status</p>
+          <div class="text-3xl mb-2">💰</div>
+          <p class="text-lg font-bold text-amber-400">₹{{ totalSpent.toFixed(0) }}</p>
+          <p class="text-[11px] text-neutral-600 mt-1">Total Spent</p>
         </div>
       </div>
 
@@ -87,6 +87,33 @@
                            b.status === 'ACTIVE' ? 'bg-sky-500/10 text-sky-400' :
                            'bg-amber-500/10 text-amber-400'">
                   {{ b.status }}
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Payment History -->
+      @if (recentPayments.length > 0) {
+        <div class="glass-card p-6 mb-6">
+          <p class="text-sm font-semibold text-neutral-300 mb-4">💳 Payment History</p>
+          <div class="space-y-2">
+            @for (p of recentPayments; track p.paymentId) {
+              <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                <div class="flex items-center gap-3">
+                  <span class="text-sm font-bold text-amber-400">₹{{ p.amount.toFixed(0) }}</span>
+                  <div>
+                    <p class="text-xs text-neutral-300">{{ p.description || 'Parking fee' }}</p>
+                    <p class="text-[10px] text-neutral-600">{{ p.receiptNumber }} · {{ p.paidAt | date:'MMM d, h:mm a' }}</p>
+                  </div>
+                </div>
+                <span class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md"
+                  [class]="p.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-400' :
+                           p.status === 'REFUNDED' ? 'bg-amber-500/10 text-amber-400' :
+                           p.status === 'FAILED' ? 'bg-red-500/10 text-red-400' :
+                           'bg-neutral-500/10 text-neutral-400'">
+                  {{ p.status }}
                 </span>
               </div>
             }

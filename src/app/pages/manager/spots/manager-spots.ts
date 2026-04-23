@@ -96,6 +96,7 @@ export class ManagerSpotsComponent implements OnInit {
   onBulkCreate(): void {
     if (this.bulkForm.count < 1) {
       this.bulkError = 'Count must be at least 1';
+      setTimeout(() => { this.bulkError = ''; this.cdr.detectChanges(); }, 6000);
       return;
     }
     this.bulkLoading = true;
@@ -124,6 +125,7 @@ export class ManagerSpotsComponent implements OnInit {
         this.bulkLoading = false;
         this.bulkError = err.error?.message || 'Failed to create spots';
         this.cdr.detectChanges();
+        setTimeout(() => { this.bulkError = ''; this.cdr.detectChanges(); }, 6000);
       },
     });
   }
