@@ -12,6 +12,7 @@ import { ManagerSpotsComponent } from './pages/manager/spots/manager-spots';
 import { SearchLotsComponent } from './pages/lots/search/search-lots';
 import { LotSpotsComponent } from './pages/lots/spots/lot-spots';
 import { MyPaymentsComponent } from './pages/payments/my-payments/my-payments';
+import { MyVehiclesComponent } from './pages/vehicles/my-vehicles/my-vehicles';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 
@@ -28,6 +29,7 @@ export const routes: Routes = [
   { path: 'manager/lots', component: ManagerLotsComponent, canActivate: [authGuard] },
   { path: 'manager/lots/:lotId/spots', component: ManagerSpotsComponent, canActivate: [authGuard] },
   { path: 'payments', component: MyPaymentsComponent, canActivate: [authGuard] },
+  { path: 'vehicles', component: MyVehiclesComponent, canActivate: [authGuard] },
   { path: 'admin/users', component: AdminUsersComponent, canActivate: [adminGuard] },
   { path: 'admin/lots', component: AdminLotsComponent, canActivate: [adminGuard] },
   { path: '**', redirectTo: '/dashboard' },

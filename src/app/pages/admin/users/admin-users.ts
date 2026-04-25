@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { AdminService } from '../../../services/admin.service';
 import {
@@ -13,7 +13,7 @@ import { NavbarComponent } from '../../../components/navbar/navbar';
 @Component({
   selector: 'app-admin-users',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, NavbarComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent],
   templateUrl: './admin-users.html',
   styleUrl: './admin-users.css',
 })

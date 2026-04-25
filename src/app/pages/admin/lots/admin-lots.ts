@@ -1,6 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { LotService } from '../../../services/lot.service';
 import { AdminService } from '../../../services/admin.service';
 import { LotResponse } from '../../../models/lot.model';
@@ -10,7 +9,7 @@ import { NavbarComponent } from '../../../components/navbar/navbar';
 @Component({
   selector: 'app-admin-lots',
   standalone: true,
-  imports: [CommonModule, RouterLink, NavbarComponent],
+  imports: [CommonModule, NavbarComponent],
   templateUrl: './admin-lots.html',
   styleUrl: './admin-lots.css',
 })

@@ -21,6 +21,10 @@
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
           <span>Payments</span>
         </a>
+        <a routerLink="/vehicles" class="nb-link" routerLinkActive="nb-link-active">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0H18.75M20.625 4.5H3.375m17.25 0A1.125 1.125 0 0121.75 5.625V14.25m0 0h-2.25m-9-7.5h6"/></svg>
+          <span>My Vehicles</span>
+        </a>
       }
       @if (user?.role === 'MANAGER') {
         <a routerLink="/manager/lots" class="nb-link" routerLinkActive="nb-link-active">

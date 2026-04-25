@@ -1,0 +1,163 @@
+<app-navbar />
+
+<main class="page-wrap">
+  <div class="page-container">
+
+    <!-- Header -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">My Vehicles</h1>
+        <p class="page-subtitle">Manage your registered vehicles</p>
+      </div>
+      <button (click)="openAddModal()" class="add-btn">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        Add Vehicle
+      </button>
+    </div>
+
+    <!-- Success message -->
+    @if (successMsg) {
+      <div class="success-bar">✅ {{ successMsg }}</div>
+    }
+
+    <!-- Stat cards -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <p class="stat-label">Total Vehicles</p>
+        <p class="stat-value">{{ vehicles.length }}</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Active</p>
+        <p class="stat-value text-emerald-400">{{ activeCount }}</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">EV Vehicles</p>
+        <p class="stat-value text-sky-400">{{ evCount }}</p>
+      </div>
+    </div>
+
+    <!-- Filter tabs -->
+    <div class="filter-tabs">
+      @for (t of ['ALL', '2W', '4W', 'HEAVY']; track t) {
+        <button (click)="filterType = t" [class.active]="filterType === t" class="filter-tab">
+          @if (t !== 'ALL') { {{ getTypeIcon(t) }} }
+          {{ t === 'ALL' ? 'All Types' : getTypeLabel(t) }}
+        </button>
+      }
+    </div>
+
+    <!-- Vehicle list -->
+    @if (loading) {
+      <div class="grid-skeleton">
+        @for (i of [1,2,3]; track i) { <div class="card-skeleton"></div> }
+      </div>
+    } @else if (filteredVehicles.length > 0) {
+      <div class="vehicle-grid">
+        @for (v of filteredVehicles; track v.vehicleId) {
+          <div class="vehicle-card" [class.inactive]="!v.isActive">
+            <!-- Top bar -->
+            <div class="vc-top">
+              <span class="vc-type-icon">{{ getTypeIcon(v.vehicleType) }}</span>
+              <div class="vc-badges">
+                @if (v.isEV) { <span class="vc-badge vc-ev">⚡ EV</span> }
+                @if (v.isActive) {
+                  <span class="vc-badge vc-active">Active</span>
+                } @else {
+                  <span class="vc-badge vc-inactive">Inactive</span>
+                }
+              </div>
+            </div>
+
+            <!-- Details -->
+            <h3 class="vc-plate">{{ v.licensePlate }}</h3>
+            <p class="vc-make">{{ v.make }} {{ v.model }}</p>
+
+            <div class="vc-details">
+              @if (v.color) {
+                <div class="vc-detail">
+                  <span class="vc-detail-label">Color</span>
+                  <span>{{ v.color }}</span>
+                </div>
+              }
+              <div class="vc-detail">
+                <span class="vc-detail-label">Type</span>
+                <span>{{ getTypeLabel(v.vehicleType) }}</span>
+              </div>
+              <div class="vc-detail">
+                <span class="vc-detail-label">Registered</span>
+                <span>{{ v.registeredAt | date:'mediumDate' }}</span>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="vc-actions">
+              <button (click)="openEditModal(v)" class="vc-action-btn vc-edit">Edit</button>
+              <button (click)="deleteVehicle(v)" class="vc-action-btn vc-delete">Delete</button>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <span class="empty-icon">🚗</span>
+        <p class="empty-title">No vehicles yet</p>
+        <p class="empty-sub">Add your first vehicle to get started</p>
+        <button (click)="openAddModal()" class="add-btn mt-4">+ Add Vehicle</button>
+      </div>
+    }
+  </div>
+
+  <!-- Add / Edit Modal -->
+  @if (showModal) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <h2 class="modal-title">{{ editingVehicle ? 'Edit Vehicle' : 'Register Vehicle' }}</h2>
+
+        @if (formError) {
+          <div class="form-error">⚠️ {{ formError }}</div>
+        }
+
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label>License Plate *</label>
+            <input [(ngModel)]="form.licensePlate" placeholder="e.g. MP04AB1234"
+              [disabled]="!!editingVehicle" [class.disabled-input]="!!editingVehicle" />
+          </div>
+          <div class="form-group">
+            <label>Make *</label>
+            <input [(ngModel)]="form.make" placeholder="e.g. Toyota" />
+          </div>
+          <div class="form-group">
+            <label>Model *</label>
+            <input [(ngModel)]="form.model" placeholder="e.g. Camry" />
+          </div>
+          <div class="form-group">
+            <label>Color</label>
+            <input [(ngModel)]="form.color" placeholder="e.g. White" />
+          </div>
+          <div class="form-group">
+            <label>Vehicle Type *</label>
+            <select [(ngModel)]="form.vehicleType">
+              <option value="2W">🏍️ 2-Wheeler</option>
+              <option value="4W">🚗 4-Wheeler</option>
+              <option value="HEAVY">🚛 Heavy</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label class="ev-toggle">
+              <input type="checkbox" [(ngModel)]="form.isEV" />
+              <span>⚡ This is an Electric Vehicle (EV)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button (click)="closeModal()" class="modal-cancel">Cancel</button>
+          <button (click)="onSubmit()" [disabled]="formLoading" class="modal-submit">
+            {{ formLoading ? 'Saving...' : (editingVehicle ? 'Update' : 'Register') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</main>

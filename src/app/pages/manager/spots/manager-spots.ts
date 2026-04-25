@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { SpotService } from '../../../services/spot.service';
 import { LotService } from '../../../services/lot.service';
 import { SpotResponse, SpotCountResponse, SpotType, VehicleType } from '../../../models/spot.model';
@@ -11,7 +11,7 @@ import { NavbarComponent } from '../../../components/navbar/navbar';
 @Component({
   selector: 'app-manager-spots',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, NavbarComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent],
   templateUrl: './manager-spots.html',
   styleUrl: './manager-spots.css',
 })

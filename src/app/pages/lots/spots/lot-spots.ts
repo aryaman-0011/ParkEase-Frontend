@@ -1,22 +1,24 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { SpotService } from '../../../services/spot.service';
 import { LotService } from '../../../services/lot.service';
 import { BookingService } from '../../../services/booking.service';
 import { AuthService } from '../../../services/auth.service';
 import { PaymentService } from '../../../services/payment.service';
+import { VehicleService } from '../../../services/vehicle.service';
 import { SpotResponse, SpotCountResponse, SpotType } from '../../../models/spot.model';
 import { LotResponse } from '../../../models/lot.model';
 import { BookingResponse } from '../../../models/booking.model';
+import { VehicleResponse } from '../../../models/vehicle.model';
 import { PaymentResponse, RazorpayOrderResponse } from '../../../models/payment.model';
 import { NavbarComponent } from '../../../components/navbar/navbar';
 
 @Component({
   selector: 'app-lot-spots',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, NavbarComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent],
   templateUrl: './lot-spots.html',
   styleUrl: './lot-spots.css',
 })
@@ -28,15 +30,38 @@ export class LotSpotsComponent implements OnInit {
   loading = true;
   filterType: string = 'ALL';
 
-  // Booking
-  activeBooking: BookingResponse | null = null;
+  // Bookings (multiple active)
+  activeBookings: BookingResponse[] = [];
   bookingLoading = false;
   bookingMessage = '';
   bookingError = '';
 
-  // Payment method modal
-  showPaymentModal = false;
+  // Vehicles
+  vehicles: VehicleResponse[] = [];
+
+  // Spot schedules (spotId → booked time slots)
+  spotSchedules: Map<number, BookingResponse[]> = new Map();
+
+  // Booking modal (step 1: payment, step 2: details)
   pendingSpot: SpotResponse | null = null;
+  showPaymentModal = false;
+  showBookingModal = false;
+  paymentMethod: 'CASH' | 'ONLINE' = 'CASH';
+
+  // Booking form
+  bookForm = {
+    vehicleId: null as number | null,
+    startDate: '',
+    startTime: '',
+    endDate: '',
+    endTime: '',
+  };
+
+  // Extend modal
+  showExtendModal = false;
+  extendingBooking: BookingResponse | null = null;
+  extendDate = '';
+  extendTime = '';
 
   // Payment receipt
   lastReceipt: PaymentResponse | null = null;
@@ -49,6 +74,7 @@ export class LotSpotsComponent implements OnInit {
     private bookingService: BookingService,
     private authService: AuthService,
     private paymentService: PaymentService,
+    private vehicleService: VehicleService,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
   ) {}
@@ -57,51 +83,75 @@ export class LotSpotsComponent implements OnInit {
     this.lotId = Number(this.route.snapshot.paramMap.get('lotId'));
     this.loadLot();
     this.loadSpots();
-    this.loadActiveBooking();
+    this.loadActiveBookings();
+    this.loadVehicles();
+    this.loadSpotSchedules();
   }
 
   loadLot(): void {
     this.lotService.getLotById(this.lotId).subscribe({
-      next: (lot: LotResponse) => {
-        this.lot = lot;
-        this.cdr.detectChanges();
-      },
+      next: (lot: LotResponse) => { this.lot = lot; this.cdr.detectChanges(); },
     });
   }
 
   loadSpots(): void {
     this.loading = true;
     this.spotService.getSpotsByLot(this.lotId).subscribe({
-      next: (spots: SpotResponse[]) => {
-        this.spots = spots;
-        this.loading = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.loading = false;
-        this.cdr.detectChanges();
-      },
+      next: (spots: SpotResponse[]) => { this.spots = spots; this.loading = false; this.cdr.detectChanges(); },
+      error: () => { this.loading = false; this.cdr.detectChanges(); },
     });
     this.spotService.getSpotCounts(this.lotId).subscribe({
-      next: (counts: SpotCountResponse) => {
-        this.counts = counts;
+      next: (counts: SpotCountResponse) => { this.counts = counts; this.cdr.detectChanges(); },
+    });
+  }
+
+  /** Refresh spots + schedules together (call after any booking change) */
+  refreshData(): void {
+    this.loadSpots();
+    this.loadSpotSchedules();
+  }
+
+  loadActiveBookings(): void {
+    const user = this.authService.getCurrentUser();
+    if (!user) return;
+    this.bookingService.getActiveBookings(user.id).subscribe({
+      next: (bookings: BookingResponse[]) => { this.activeBookings = bookings; this.cdr.detectChanges(); },
+      error: () => { this.activeBookings = []; this.cdr.detectChanges(); },
+    });
+  }
+
+  loadSpotSchedules(): void {
+    this.bookingService.getLotBookings(this.lotId).subscribe({
+      next: (bookings: BookingResponse[]) => {
+        this.spotSchedules.clear();
+        const now = new Date();
+        const activeBookings = bookings.filter(b =>
+          (b.status === 'RESERVED' || b.status === 'ACTIVE') &&
+          new Date(b.scheduledEndTime) > now
+        );
+        for (const b of activeBookings) {
+          const list = this.spotSchedules.get(b.spotId) || [];
+          list.push(b);
+          this.spotSchedules.set(b.spotId, list);
+        }
+        // Sort each list by start time
+        this.spotSchedules.forEach((list) =>
+          list.sort((a, c) => new Date(a.scheduledStartTime).getTime() - new Date(c.scheduledStartTime).getTime())
+        );
         this.cdr.detectChanges();
       },
     });
   }
 
-  loadActiveBooking(): void {
+  getSpotBookings(spotId: number): BookingResponse[] {
+    return this.spotSchedules.get(spotId) || [];
+  }
+
+  loadVehicles(): void {
     const user = this.authService.getCurrentUser();
     if (!user) return;
-    this.bookingService.getActiveBooking(user.id).subscribe({
-      next: (b: BookingResponse) => {
-        this.activeBooking = b;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.activeBooking = null;
-        this.cdr.detectChanges();
-      },
+    this.vehicleService.getVehiclesByOwner(user.id).subscribe({
+      next: (v: VehicleResponse[]) => { this.vehicles = v.filter(x => x.isActive); this.cdr.detectChanges(); },
     });
   }
 
@@ -111,13 +161,10 @@ export class LotSpotsComponent implements OnInit {
     setTimeout(() => { this.bookingError = ''; this.cdr.detectChanges(); }, 6000);
   }
 
+  // ── STEP 1: Click Book → Payment Modal ──
   bookSpot(spot: SpotResponse): void {
     const user = this.authService.getCurrentUser();
     if (!user) { this.showError('You must be logged in.'); return; }
-    if (this.activeBooking) {
-      this.showError('You already have an active booking. Cancel or complete it first.');
-      return;
-    }
     this.pendingSpot = spot;
     this.showPaymentModal = true;
     this.cdr.detectChanges();
@@ -129,29 +176,85 @@ export class LotSpotsComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  bookWithCash(): void {
+  // ── STEP 2: Choose payment → Booking Details Modal ──
+  selectPayment(method: 'CASH' | 'ONLINE'): void {
+    this.paymentMethod = method;
+    this.showPaymentModal = false;
+    this.showBookingModal = true;
+    // Set default times (now + 1hr)
+    const now = new Date();
+    const end = new Date(now.getTime() + 60 * 60 * 1000);
+    this.bookForm.startDate = this.toDateStr(now);
+    this.bookForm.startTime = this.toTimeStr(now);
+    this.bookForm.endDate = this.toDateStr(end);
+    this.bookForm.endTime = this.toTimeStr(end);
+    this.bookForm.vehicleId = this.vehicles.length > 0 ? this.vehicles[0].vehicleId : null;
+    this.cdr.detectChanges();
+  }
+
+  dismissBookingModal(): void {
+    this.showBookingModal = false;
+    this.pendingSpot = null;
+    this.cdr.detectChanges();
+  }
+
+  get estimatedHours(): number {
+    const start = this.parseDateTime(this.bookForm.startDate, this.bookForm.startTime);
+    const end = this.parseDateTime(this.bookForm.endDate, this.bookForm.endTime);
+    if (!start || !end || end <= start) return 0;
+    return Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (60 * 60 * 1000)));
+  }
+
+  get estimatedCost(): number {
+    const rate = this.pendingSpot?.pricePerHour || this.lot?.pricePerHour || 0;
+    return this.estimatedHours * rate;
+  }
+
+  get selectedVehicle(): VehicleResponse | undefined {
+    return this.vehicles.find(v => v.vehicleId === this.bookForm.vehicleId);
+  }
+
+  // ── STEP 3: Submit Booking ──
+  submitBooking(): void {
     if (!this.pendingSpot) return;
-    const spot = this.pendingSpot;
     const user = this.authService.getCurrentUser();
     if (!user) return;
-    this.showPaymentModal = false;
+    const spot = this.pendingSpot;
+
+    const start = this.parseDateTime(this.bookForm.startDate, this.bookForm.startTime);
+    const end = this.parseDateTime(this.bookForm.endDate, this.bookForm.endTime);
+    if (!start || !end) { this.showError('Please select valid start and end times.'); return; }
+    if (end <= start) { this.showError('End time must be after start time.'); return; }
+
+    this.showBookingModal = false;
     this.bookingLoading = true;
     this.bookingError = '';
     this.bookingMessage = '';
-    this.bookingService.createBooking({
+
+    const request = {
       userId: user.id,
       spotId: spot.spotId,
       lotId: this.lotId,
-      vehiclePlate: user.vehiclePlate || undefined,
-    }).subscribe({
+      vehicleId: this.bookForm.vehicleId || undefined,
+      vehiclePlate: this.selectedVehicle?.licensePlate || user.vehiclePlate || undefined,
+      scheduledStartTime: this.toLocalISOString(start),
+      scheduledEndTime: this.toLocalISOString(end),
+    };
+
+    this.bookingService.createBooking(request).subscribe({
       next: (b: BookingResponse) => {
-        this.activeBooking = b;
+        this.activeBookings.push(b);
         this.pendingSpot = null;
-        this.bookingMessage = `Spot ${b.spotNumber} booked! Pay ₹${spot.pricePerHour}/hr in cash at exit.`;
-        this.bookingLoading = false;
-        this.loadSpots();
-        this.cdr.detectChanges();
-        setTimeout(() => { this.bookingMessage = ''; this.cdr.detectChanges(); }, 5000);
+
+        if (this.paymentMethod === 'ONLINE') {
+          this.handleOnlinePayment(b, spot, user);
+        } else {
+          this.bookingMessage = `Spot ${b.spotNumber} booked (${this.bookForm.startTime}–${this.bookForm.endTime})! Pay ₹${this.estimatedCost} in cash.`;
+          this.bookingLoading = false;
+          this.refreshData();
+          this.cdr.detectChanges();
+          setTimeout(() => { this.bookingMessage = ''; this.cdr.detectChanges(); }, 6000);
+        }
       },
       error: (err: any) => {
         this.pendingSpot = null;
@@ -161,156 +264,164 @@ export class LotSpotsComponent implements OnInit {
     });
   }
 
-  async bookWithOnline(): Promise<void> {
-    if (!this.pendingSpot) return;
-    const spot = this.pendingSpot;
-    const user = this.authService.getCurrentUser();
-    if (!user) return;
-    this.showPaymentModal = false;
-    this.bookingLoading = true;
-    this.bookingError = '';
-    this.bookingMessage = '';
-
-    // Step 1: Create booking
-    this.bookingService.createBooking({
+  private handleOnlinePayment(b: BookingResponse, spot: SpotResponse, user: any): void {
+    const amount = this.estimatedCost || spot.pricePerHour || this.lot?.pricePerHour || 0;
+    this.paymentService.createOrder({
+      bookingId: b.bookingId,
       userId: user.id,
-      spotId: spot.spotId,
-      lotId: this.lotId,
-      vehiclePlate: user.vehiclePlate || undefined,
+      amount: amount,
+      description: `Parking at ${this.lot?.name} – Spot ${b.spotNumber}`,
     }).subscribe({
-      next: (b: BookingResponse) => {
-        this.activeBooking = b;
-        this.pendingSpot = null;
-        const amount = spot.pricePerHour || this.lot?.pricePerHour || 0;
-
-        // Step 2: Create Razorpay order
-        this.paymentService.createOrder({
-          bookingId: b.bookingId,
-          userId: user.id,
-          amount: amount,
-          description: `Parking at ${this.lot?.name} \u2013 Spot ${b.spotNumber}`,
-        }).subscribe({
-          next: async (order: RazorpayOrderResponse) => {
-            this.bookingLoading = false;
-            this.cdr.detectChanges();
-
-            try {
-              // Step 3: Open Razorpay popup
-              const result = await this.paymentService.openCheckout(order, {
-                fullName: user.fullName,
-                email: user.email,
-              });
-
-              // Step 4: Verify payment
-              this.bookingLoading = true;
-              this.cdr.detectChanges();
-
-              this.paymentService.verifyPayment({
-                paymentId: order.paymentId,
-                razorpayPaymentId: result.razorpayPaymentId,
-                razorpayOrderId: result.razorpayOrderId,
-                razorpaySignature: result.razorpaySignature,
-              }).subscribe({
-                next: (receipt: PaymentResponse) => {
-                  this.lastReceipt = receipt;
-                  this.bookingMessage = `Spot ${b.spotNumber} booked & paid! \u20b9${amount.toFixed(2)}`;
-                  this.bookingLoading = false;
-                  this.loadSpots();
-                  this.cdr.detectChanges();
-                },
-                error: (err: any) => {
-                  this.bookingLoading = false;
-                  this.loadSpots();
-                  this.showError(err.error?.message || 'Payment verification failed. Booking is active, pay at exit.');
-                },
-              });
-            } catch (err: any) {
+      next: async (order: RazorpayOrderResponse) => {
+        this.bookingLoading = false;
+        this.cdr.detectChanges();
+        try {
+          const result = await this.paymentService.openCheckout(order, {
+            fullName: user.fullName, email: user.email,
+          });
+          this.bookingLoading = true;
+          this.cdr.detectChanges();
+          this.paymentService.verifyPayment({
+            paymentId: order.paymentId,
+            razorpayPaymentId: result.razorpayPaymentId,
+            razorpayOrderId: result.razorpayOrderId,
+            razorpaySignature: result.razorpaySignature,
+          }).subscribe({
+            next: (receipt: PaymentResponse) => {
+              this.lastReceipt = receipt;
+              this.bookingMessage = `Spot ${b.spotNumber} booked & paid! ₹${amount.toFixed(2)}`;
               this.bookingLoading = false;
-              this.loadSpots();
-              this.bookingMessage = `Spot ${b.spotNumber} booked! Payment skipped \u2013 pay at exit.`;
+              this.refreshData();
               this.cdr.detectChanges();
-              setTimeout(() => { this.bookingMessage = ''; this.cdr.detectChanges(); }, 6000);
-            }
-          },
-          error: (err: any) => {
-            this.bookingLoading = false;
-            this.loadSpots();
-            this.bookingMessage = `Spot ${b.spotNumber} booked! Could not start payment \u2013 pay at exit.`;
-            this.cdr.detectChanges();
-            setTimeout(() => { this.bookingMessage = ''; this.cdr.detectChanges(); }, 6000);
-          },
-        });
+            },
+            error: () => {
+              this.bookingLoading = false;
+              this.refreshData();
+              this.showError('Payment verification failed. Booking active — pay at exit.');
+            },
+          });
+        } catch {
+          this.bookingLoading = false;
+          this.refreshData();
+          this.bookingMessage = `Spot ${b.spotNumber} booked! Payment skipped — pay at exit.`;
+          this.cdr.detectChanges();
+          setTimeout(() => { this.bookingMessage = ''; this.cdr.detectChanges(); }, 6000);
+        }
       },
-      error: (err: any) => {
-        this.pendingSpot = null;
+      error: () => {
         this.bookingLoading = false;
-        this.showError(err.error?.message || 'Booking failed.');
+        this.refreshData();
+        this.bookingMessage = `Spot ${b.spotNumber} booked! Could not start payment — pay at exit.`;
+        this.cdr.detectChanges();
+        setTimeout(() => { this.bookingMessage = ''; this.cdr.detectChanges(); }, 6000);
       },
     });
   }
 
-  checkIn(): void {
-    if (!this.activeBooking) return;
+  // ── Check-in / Check-out / Cancel (per booking) ──
+  checkIn(b: BookingResponse): void {
     this.bookingLoading = true;
-    this.bookingService.checkIn(this.activeBooking.bookingId).subscribe({
-      next: (b: BookingResponse) => {
-        this.activeBooking = b;
-        this.bookingMessage = 'Checked in! Enjoy your parking.';
+    this.bookingService.checkIn(b.bookingId).subscribe({
+      next: (updated: BookingResponse) => {
+        this.updateBookingInList(updated);
+        this.bookingMessage = `Checked in to ${updated.spotNumber}!`;
         this.bookingLoading = false;
-        this.loadSpots();
+        this.refreshData();
         this.cdr.detectChanges();
         setTimeout(() => { this.bookingMessage = ''; this.cdr.detectChanges(); }, 5000);
       },
-      error: (err: any) => {
-        this.bookingLoading = false;
-        this.showError(err.error?.message || 'Check-in failed.');
-      },
+      error: (err: any) => { this.bookingLoading = false; this.showError(err.error?.message || 'Check-in failed.'); },
     });
   }
 
-  checkOut(): void {
-    if (!this.activeBooking) return;
+  checkOut(b: BookingResponse): void {
     this.bookingLoading = true;
-    this.bookingError = '';
-    this.bookingService.checkOut(this.activeBooking.bookingId).subscribe({
-      next: (b: BookingResponse) => {
-        this.activeBooking = null;
-        this.bookingMessage = `Checked out! Total: \u20b9${b.totalCost?.toFixed(2)}`;
+    this.bookingService.checkOut(b.bookingId).subscribe({
+      next: (updated: BookingResponse) => {
+        this.activeBookings = this.activeBookings.filter(x => x.bookingId !== updated.bookingId);
+        this.bookingMessage = `Checked out from ${updated.spotNumber}! Total: ₹${updated.totalCost?.toFixed(2)}`;
         this.bookingLoading = false;
-        this.loadSpots();
+        this.refreshData();
         this.cdr.detectChanges();
         setTimeout(() => { this.bookingMessage = ''; this.cdr.detectChanges(); }, 8000);
       },
+      error: (err: any) => { this.bookingLoading = false; this.showError(err.error?.message || 'Check-out failed.'); },
+    });
+  }
+
+  cancelBooking(b: BookingResponse): void {
+    this.bookingLoading = true;
+    this.bookingService.cancelBooking(b.bookingId).subscribe({
+      next: () => {
+        this.activeBookings = this.activeBookings.filter(x => x.bookingId !== b.bookingId);
+        this.bookingMessage = `Booking for ${b.spotNumber} cancelled.`;
+        this.bookingLoading = false;
+        this.refreshData();
+        this.cdr.detectChanges();
+        setTimeout(() => { this.bookingMessage = ''; this.cdr.detectChanges(); }, 5000);
+      },
+      error: (err: any) => { this.bookingLoading = false; this.showError(err.error?.message || 'Cancel failed.'); },
+    });
+  }
+
+  // ── Extend Booking ──
+  openExtendModal(b: BookingResponse): void {
+    this.extendingBooking = b;
+    const end = new Date(b.scheduledEndTime);
+    const newEnd = new Date(end.getTime() + 60 * 60 * 1000); // +1hr default
+    this.extendDate = this.toDateStr(newEnd);
+    this.extendTime = this.toTimeStr(newEnd);
+    this.showExtendModal = true;
+    this.cdr.detectChanges();
+  }
+
+  dismissExtendModal(): void {
+    this.showExtendModal = false;
+    this.extendingBooking = null;
+    this.cdr.detectChanges();
+  }
+
+  submitExtend(): void {
+    if (!this.extendingBooking) return;
+    const newEnd = this.parseDateTime(this.extendDate, this.extendTime);
+    if (!newEnd) { this.showError('Please select a valid time.'); return; }
+
+    this.showExtendModal = false;
+    this.bookingLoading = true;
+    this.bookingService.extendBooking(this.extendingBooking.bookingId, {
+      newEndTime: this.toLocalISOString(newEnd),
+    }).subscribe({
+      next: (updated: BookingResponse) => {
+        this.updateBookingInList(updated);
+        this.bookingMessage = `Booking extended until ${this.extendTime}!`;
+        this.bookingLoading = false;
+        this.extendingBooking = null;
+        this.cdr.detectChanges();
+        setTimeout(() => { this.bookingMessage = ''; this.cdr.detectChanges(); }, 5000);
+      },
       error: (err: any) => {
         this.bookingLoading = false;
-        this.showError(err.error?.message || 'Check-out failed.');
+        this.extendingBooking = null;
+        this.showError(err.error?.message || 'Cannot extend booking.');
       },
     });
   }
 
+  // ── Receipt ──
   dismissReceipt(): void {
     this.lastReceipt = null;
     this.bookingMessage = '';
     this.cdr.detectChanges();
   }
 
-  cancelBooking(): void {
-    if (!this.activeBooking) return;
-    this.bookingLoading = true;
-    this.bookingService.cancelBooking(this.activeBooking.bookingId).subscribe({
-      next: () => {
-        this.activeBooking = null;
-        this.bookingMessage = 'Booking cancelled.';
-        this.bookingLoading = false;
-        this.loadSpots();
-        this.cdr.detectChanges();
-        setTimeout(() => { this.bookingMessage = ''; this.cdr.detectChanges(); }, 5000);
-      },
-      error: (err: any) => {
-        this.bookingLoading = false;
-        this.showError(err.error?.message || 'Cancel failed.');
-      },
-    });
+  // ── Helpers ──
+  private updateBookingInList(updated: BookingResponse): void {
+    const idx = this.activeBookings.findIndex(x => x.bookingId === updated.bookingId);
+    if (idx >= 0) this.activeBookings[idx] = updated;
+  }
+
+  isSpotBookedByMe(spot: SpotResponse): boolean {
+    return this.activeBookings.some(b => b.spotId === spot.spotId);
   }
 
   get filteredSpots(): SpotResponse[] {
@@ -336,5 +447,24 @@ export class LotSpotsComponent implements OnInit {
       case 'HEAVY': return 'Heavy';
       default: return type;
     }
+  }
+
+  // ── Date/time utilities (LOCAL time, not UTC) ──
+  private toDateStr(d: Date): string {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+  private toTimeStr(d: Date): string {
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  }
+  private parseDateTime(date: string, time: string): Date | null {
+    if (!date || !time) return null;
+    return new Date(`${date}T${time}:00`);
+  }
+  /** Format a Date as local datetime string for backend (yyyy-MM-ddTHH:mm:ss) */
+  private toLocalISOString(d: Date): string {
+    return `${this.toDateStr(d)}T${this.toTimeStr(d)}:00`;
   }
 }

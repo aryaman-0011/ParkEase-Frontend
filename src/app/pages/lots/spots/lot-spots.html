@@ -24,7 +24,6 @@
 
     <!-- Availability Summary -->
     @if (counts && counts.total > 0) {
-      <!-- Individual spots exist in spot-service -->
       <div class="bg-white/[0.03] border border-white/[0.06] rounded-xl p-5 mb-8">
         <div class="flex items-center justify-between mb-3">
           <span class="text-sm text-neutral-400">Spot Availability</span>
@@ -42,7 +41,6 @@
         </div>
       </div>
     } @else if (lot && counts && counts.total === 0) {
-      <!-- No individual spots, fall back to lot-level data -->
       <div class="bg-white/[0.03] border border-white/[0.06] rounded-xl p-5 mb-8">
         <div class="flex items-center justify-between mb-3">
           <span class="text-sm text-neutral-400">Lot Availability</span>
@@ -53,9 +51,6 @@
             <div class="h-full bg-emerald-500 transition-all" [style.width.%]="(lot.availableSpots / lot.totalSpots) * 100"></div>
           }
         </div>
-        <p class="text-[11px] text-neutral-600 mt-2">
-          ℹ️ This lot has {{ lot.totalSpots }} parking spots. Individual spot selection will be available soon.
-        </p>
       </div>
     }
 
@@ -71,46 +66,66 @@
       </div>
     }
 
-    <!-- Active Booking Card -->
-    @if (activeBooking) {
-      <div class="booking-card mb-6">
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full" [class]="activeBooking.status === 'RESERVED' ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400 animate-pulse'"></span>
-            <span class="text-sm font-semibold">{{ activeBooking.status === 'RESERVED' ? 'Reserved' : 'Checked In' }}</span>
-          </div>
-          <span class="text-xs text-neutral-500">Booking #{{ activeBooking.bookingId }}</span>
-        </div>
-        <div class="flex items-center gap-4 mb-4">
-          <div class="w-12 h-12 bg-white/[0.04] border border-white/[0.08] rounded-xl flex items-center justify-center">
-            <span class="text-lg font-bold">{{ activeBooking.spotNumber }}</span>
-          </div>
-          <div>
-            <p class="text-sm font-medium">{{ activeBooking.lotName }}</p>
-            <p class="text-xs text-neutral-500">₹{{ activeBooking.pricePerHour }}/hr · {{ activeBooking.vehiclePlate || 'No plate' }}</p>
-          </div>
-        </div>
-        <div class="flex gap-2">
-          @if (activeBooking.status === 'RESERVED') {
-            <button (click)="checkIn()" [disabled]="bookingLoading" class="booking-btn booking-btn-primary flex-1">
-              {{ bookingLoading ? 'Processing...' : '✓ Check In' }}
-            </button>
-            <button (click)="cancelBooking()" [disabled]="bookingLoading" class="booking-btn booking-btn-cancel flex-1">
-              {{ bookingLoading ? '...' : '✕ Cancel' }}
-            </button>
-          }
-          @if (activeBooking.status === 'ACTIVE') {
-            <button (click)="checkOut()" [disabled]="bookingLoading" class="booking-btn booking-btn-checkout flex-1">
-              {{ bookingLoading ? 'Processing...' : '🚗 Check Out' }}
-            </button>
+    <!-- Active Bookings Panel (multiple) -->
+    @if (activeBookings.length > 0) {
+      <div class="mb-6">
+        <h3 class="text-sm font-semibold text-neutral-400 mb-3">🎫 Your Active Bookings ({{ activeBookings.length }})</h3>
+        <div class="active-bookings-grid">
+          @for (b of activeBookings; track b.bookingId) {
+            <div class="booking-card">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full" [class]="b.status === 'RESERVED' ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400 animate-pulse'"></span>
+                  <span class="text-sm font-semibold">{{ b.status === 'RESERVED' ? 'Reserved' : 'Checked In' }}</span>
+                </div>
+                <span class="text-xs text-neutral-500">#{{ b.bookingId }}</span>
+              </div>
+              <div class="flex items-center gap-4 mb-3">
+                <div class="w-12 h-12 bg-white/[0.04] border border-white/[0.08] rounded-xl flex items-center justify-center">
+                  <span class="text-lg font-bold">{{ b.spotNumber }}</span>
+                </div>
+                <div>
+                  <p class="text-sm font-medium">{{ b.lotName }}</p>
+                  <p class="text-xs text-neutral-500">₹{{ b.pricePerHour }}/hr · {{ b.vehiclePlate || 'No plate' }}</p>
+                </div>
+              </div>
+              <!-- Time slot info -->
+              <div class="time-slot-bar">
+                <div class="time-slot-item">
+                  <span class="time-slot-label">From</span>
+                  <span class="time-slot-value">{{ b.scheduledStartTime | date:'MMM d, h:mm a' }}</span>
+                </div>
+                <div class="time-slot-item">
+                  <span class="time-slot-label">To</span>
+                  <span class="time-slot-value">{{ b.scheduledEndTime | date:'MMM d, h:mm a' }}</span>
+                </div>
+              </div>
+              <div class="flex gap-2 mt-3">
+                @if (b.status === 'RESERVED') {
+                  <button (click)="checkIn(b)" [disabled]="bookingLoading" class="booking-btn booking-btn-primary flex-1">
+                    {{ bookingLoading ? '...' : '✓ Check In' }}
+                  </button>
+                  <button (click)="cancelBooking(b)" [disabled]="bookingLoading" class="booking-btn booking-btn-cancel flex-1">
+                    ✕ Cancel
+                  </button>
+                }
+                @if (b.status === 'ACTIVE') {
+                  <button (click)="openExtendModal(b)" [disabled]="bookingLoading" class="booking-btn booking-btn-extend flex-1">
+                    ⏱️ Extend
+                  </button>
+                  <button (click)="checkOut(b)" [disabled]="bookingLoading" class="booking-btn booking-btn-checkout flex-1">
+                    🚗 Check Out
+                  </button>
+                }
+              </div>
+            </div>
           }
         </div>
       </div>
     }
 
-    <!-- Content based on whether individual spots exist -->
+    <!-- Type Filters + Spot Grid -->
     @if (!loading && counts && counts.total > 0) {
-      <!-- Type Filters -->
       <div class="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
         <button (click)="filterType = 'ALL'" [class]="filterType === 'ALL' ? 'filter-pill filter-pill-active' : 'filter-pill'">All Types</button>
         @for (t of spotTypes; track t) {
@@ -120,12 +135,13 @@
         }
       </div>
 
-      <!-- Spot Grid -->
       @if (filteredSpots.length > 0) {
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           @for (spot of filteredSpots; track spot.spotId) {
-            <div class="spot-tile" [class.spot-reserved]="spot.status === 'RESERVED'" [class.spot-occupied]="spot.status === 'OCCUPIED'">
-              <!-- Number + status dot -->
+            <div class="spot-tile"
+              [class.spot-reserved]="spot.status === 'RESERVED'"
+              [class.spot-occupied]="spot.status === 'OCCUPIED'"
+              [class.spot-mine]="isSpotBookedByMe(spot)">
               <div class="flex items-center justify-between mb-1">
                 <span class="text-[15px] font-bold tracking-wide text-white">{{ spot.spotNumber }}</span>
                 <span class="w-1.5 h-1.5 rounded-full"
@@ -134,10 +150,9 @@
 
               <p class="text-[10px] font-medium uppercase tracking-widest mb-3"
                 [class]="spot.status === 'AVAILABLE' ? 'text-emerald-500' : spot.status === 'RESERVED' ? 'text-amber-500' : 'text-red-500'">
-                {{ spot.status }}
+                {{ isSpotBookedByMe(spot) ? 'YOUR BOOKING' : spot.status }}
               </p>
 
-              <!-- Info -->
               <div class="text-[11px] text-neutral-600 space-y-1">
                 <div class="flex items-center justify-between">
                   <span>{{ getSpotTypeIcon(spot.spotType) }} Floor {{ spot.floor }} · {{ getTypeLabel(spot.vehicleType) }}</span>
@@ -153,11 +168,30 @@
                 }
               </div>
 
-              <!-- Book button (only for available spots) -->
+              <!-- Booked time slots -->
+              @if (getSpotBookings(spot.spotId).length > 0) {
+                <div class="booked-slots">
+                  <span class="booked-slots-title">📅 Booked Slots</span>
+                  @for (bk of getSpotBookings(spot.spotId); track bk.bookingId) {
+                    <div class="booked-slot-row">
+                      <span class="booked-slot-date">{{ bk.scheduledStartTime | date:'MMM d' }}</span>
+                      <span class="booked-slot-time">{{ bk.scheduledStartTime | date:'h:mm a' }}</span>
+                      <span class="booked-slot-dash">–</span>
+                      <span class="booked-slot-time">{{ bk.scheduledEndTime | date:'h:mm a' }}</span>
+                    </div>
+                  }
+                </div>
+              }
+
               @if (spot.status === 'AVAILABLE') {
-                <button (click)="bookSpot(spot)" [disabled]="bookingLoading || !!activeBooking"
-                  class="book-spot-btn" [class.opacity-50]="!!activeBooking">
-                  {{ activeBooking ? 'Booking Active' : 'Book This Spot' }}
+                <button (click)="bookSpot(spot)" [disabled]="bookingLoading"
+                  class="book-spot-btn">
+                  Book This Spot
+                </button>
+              } @else if (!isSpotBookedByMe(spot)) {
+                <button (click)="bookSpot(spot)" [disabled]="bookingLoading"
+                  class="book-spot-btn book-spot-btn-alt">
+                  Book Another Slot
                 </button>
               }
             </div>
@@ -167,18 +201,15 @@
         <div class="text-center py-20">
           <p class="text-5xl mb-4">😔</p>
           <p class="text-neutral-500 text-lg">No available spots right now</p>
-          <p class="text-neutral-600 text-sm mt-1">All spots are currently reserved or occupied</p>
         </div>
       }
     } @else if (!loading && counts && counts.total === 0 && lot) {
-      <!-- Lot-level view: no individual spots configured yet -->
       <div class="text-center py-16">
         <div class="w-20 h-20 bg-emerald-500/[0.07] border border-emerald-500/[0.15] rounded-2xl flex items-center justify-center mx-auto mb-5">
           <span class="text-4xl">🅿️</span>
         </div>
         <p class="text-white text-lg font-semibold mb-1">{{ lot.availableSpots }} spots available</p>
-        <p class="text-neutral-500 text-sm">This lot has {{ lot.totalSpots }} total parking spots at ₹{{ lot.pricePerHour }}/hr</p>
-        <p class="text-neutral-600 text-xs mt-3">Individual spot selection coming soon — you can park at any available spot</p>
+        <p class="text-neutral-500 text-sm">{{ lot.totalSpots }} total spots at ₹{{ lot.pricePerHour }}/hr</p>
       </div>
     }
 
@@ -192,7 +223,7 @@
     }
   </div>
 
-  <!-- Payment Method Modal -->
+  <!-- MODAL 1: Payment Method -->
   @if (showPaymentModal && pendingSpot) {
     <div class="receipt-overlay" (click)="dismissPaymentModal()">
       <div class="receipt-card" (click)="$event.stopPropagation()">
@@ -213,30 +244,129 @@
             <span class="text-neutral-500">Rate</span>
             <span class="font-bold text-amber-400">₹{{ pendingSpot.pricePerHour || lot?.pricePerHour }}/hr</span>
           </div>
-          <div class="receipt-row">
-            <span class="text-neutral-500">Type</span>
-            <span>{{ pendingSpot.spotType }}</span>
-          </div>
         </div>
 
         <div class="pay-method-btns">
-          <button (click)="bookWithCash()" class="pay-method-btn pay-cash">
+          <button (click)="selectPayment('CASH')" class="pay-method-btn pay-cash">
             <span class="text-xl">💵</span>
             <div>
               <p class="font-semibold text-sm">Pay with Cash</p>
               <p class="text-[10px] text-neutral-500">Pay at exit after parking</p>
             </div>
           </button>
-          <button (click)="bookWithOnline()" class="pay-method-btn pay-online">
+          <button (click)="selectPayment('ONLINE')" class="pay-method-btn pay-online">
             <span class="text-xl">💳</span>
             <div>
               <p class="font-semibold text-sm">Pay Online</p>
-              <p class="text-[10px] text-neutral-500">UPI, Card, Netbanking via Razorpay</p>
+              <p class="text-[10px] text-neutral-500">UPI, Card, Netbanking</p>
             </div>
           </button>
         </div>
 
         <button (click)="dismissPaymentModal()" class="mt-3 w-full text-center text-xs text-neutral-600 hover:text-neutral-400 transition-colors py-2">Cancel</button>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL 2: Booking Details (Vehicle + Time) -->
+  @if (showBookingModal && pendingSpot) {
+    <div class="receipt-overlay" (click)="dismissBookingModal()">
+      <div class="receipt-card booking-detail-modal" (click)="$event.stopPropagation()">
+        <div class="text-center mb-4">
+          <h2 class="text-lg font-bold">📋 Book Spot {{ pendingSpot.spotNumber }}</h2>
+          <p class="text-xs text-neutral-500 mt-1">Select vehicle and time slot</p>
+        </div>
+
+        <!-- Vehicle selector -->
+        <div class="form-group-bm">
+          <label>Vehicle</label>
+          @if (vehicles.length > 0) {
+            <select [(ngModel)]="bookForm.vehicleId">
+              @for (v of vehicles; track v.vehicleId) {
+                <option [ngValue]="v.vehicleId">{{ v.licensePlate }} — {{ v.make }} {{ v.model }}</option>
+              }
+            </select>
+          } @else {
+            <p class="text-xs text-neutral-500 py-2">No vehicles registered. <a href="/vehicles" class="text-sky-400 underline">Add one</a></p>
+          }
+        </div>
+
+        <!-- Start Date/Time -->
+        <div class="form-row-bm">
+          <div class="form-group-bm">
+            <label>Start Date</label>
+            <input type="date" [(ngModel)]="bookForm.startDate" />
+          </div>
+          <div class="form-group-bm">
+            <label>Start Time</label>
+            <input type="time" [(ngModel)]="bookForm.startTime" />
+          </div>
+        </div>
+
+        <!-- End Date/Time -->
+        <div class="form-row-bm">
+          <div class="form-group-bm">
+            <label>End Date</label>
+            <input type="date" [(ngModel)]="bookForm.endDate" />
+          </div>
+          <div class="form-group-bm">
+            <label>End Time</label>
+            <input type="time" [(ngModel)]="bookForm.endTime" />
+          </div>
+        </div>
+
+        <!-- Cost estimate -->
+        <div class="cost-estimate">
+          <div class="cost-row">
+            <span class="text-neutral-500">Duration</span>
+            <span>{{ estimatedHours }} hour{{ estimatedHours !== 1 ? 's' : '' }}</span>
+          </div>
+          <div class="cost-row">
+            <span class="text-neutral-500">Rate</span>
+            <span>₹{{ pendingSpot.pricePerHour || lot?.pricePerHour }}/hr</span>
+          </div>
+          <div class="cost-row cost-total">
+            <span>Estimated Total</span>
+            <span class="text-emerald-400 text-lg font-bold">₹{{ estimatedCost }}</span>
+          </div>
+        </div>
+
+        <div class="flex gap-3 mt-4">
+          <button (click)="dismissBookingModal()" class="booking-btn booking-btn-cancel flex-1">Cancel</button>
+          <button (click)="submitBooking()" [disabled]="bookingLoading || estimatedHours === 0" class="booking-btn booking-btn-primary flex-1">
+            {{ bookingLoading ? 'Booking...' : 'Confirm Booking' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL 3: Extend Booking -->
+  @if (showExtendModal && extendingBooking) {
+    <div class="receipt-overlay" (click)="dismissExtendModal()">
+      <div class="receipt-card" (click)="$event.stopPropagation()">
+        <div class="text-center mb-4">
+          <h2 class="text-lg font-bold">⏱️ Extend Booking</h2>
+          <p class="text-xs text-neutral-500 mt-1">Spot {{ extendingBooking.spotNumber }} · Currently until {{ extendingBooking.scheduledEndTime | date:'h:mm a' }}</p>
+        </div>
+
+        <div class="form-row-bm">
+          <div class="form-group-bm">
+            <label>New End Date</label>
+            <input type="date" [(ngModel)]="extendDate" />
+          </div>
+          <div class="form-group-bm">
+            <label>New End Time</label>
+            <input type="time" [(ngModel)]="extendTime" />
+          </div>
+        </div>
+
+        <div class="flex gap-3 mt-4">
+          <button (click)="dismissExtendModal()" class="booking-btn booking-btn-cancel flex-1">Cancel</button>
+          <button (click)="submitExtend()" [disabled]="bookingLoading" class="booking-btn booking-btn-primary flex-1">
+            {{ bookingLoading ? 'Extending...' : 'Extend' }}
+          </button>
+        </div>
       </div>
     </div>
   }
@@ -270,18 +400,6 @@
             <span class="text-neutral-500">Status</span>
             <span class="text-emerald-400 font-semibold text-xs uppercase">{{ lastReceipt.status }}</span>
           </div>
-          @if (lastReceipt.description) {
-            <div class="receipt-row">
-              <span class="text-neutral-500">For</span>
-              <span class="text-xs text-right">{{ lastReceipt.description }}</span>
-            </div>
-          }
-          @if (lastReceipt.paidAt) {
-            <div class="receipt-row">
-              <span class="text-neutral-500">Paid at</span>
-              <span class="text-xs">{{ lastReceipt.paidAt | date:'MMM d, h:mm a' }}</span>
-            </div>
-          }
         </div>
 
         <button (click)="dismissReceipt()" class="receipt-close-btn">Done</button>
@@ -289,4 +407,3 @@
     </div>
   }
 </div>
-

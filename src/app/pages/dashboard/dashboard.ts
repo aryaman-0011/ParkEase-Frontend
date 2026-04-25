@@ -103,9 +103,9 @@ export class DashboardComponent implements OnInit {
 
   private loadDriverData(): void {
     if (!this.user) return;
-    this.bookingService.getActiveBooking(this.user.id).subscribe({
-      next: (b: BookingResponse) => {
-        this.activeBooking = b;
+    this.bookingService.getActiveBookings(this.user.id).subscribe({
+      next: (bookings: BookingResponse[]) => {
+        this.activeBooking = bookings.length > 0 ? bookings[0] : null;
         this.cdr.detectChanges();
       },
       error: () => { this.activeBooking = null; },
