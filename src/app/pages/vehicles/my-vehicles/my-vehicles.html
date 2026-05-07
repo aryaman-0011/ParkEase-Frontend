@@ -10,14 +10,14 @@
         <p class="page-subtitle">Manage your registered vehicles</p>
       </div>
       <button (click)="openAddModal()" class="add-btn">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        <span class="material-icons-round" style="font-size:16px">add</span>
         Add Vehicle
       </button>
     </div>
 
     <!-- Success message -->
     @if (successMsg) {
-      <div class="success-bar">✅ {{ successMsg }}</div>
+      <div class="success-bar">{{ successMsg }}</div>
     }
 
     <!-- Stat cards -->
@@ -40,7 +40,7 @@
     <div class="filter-tabs">
       @for (t of ['ALL', '2W', '4W', 'HEAVY']; track t) {
         <button (click)="filterType = t" [class.active]="filterType === t" class="filter-tab">
-          @if (t !== 'ALL') { {{ getTypeIcon(t) }} }
+          @if (t !== 'ALL') { <span class="material-icons-round" [style.color]="getTypeColor(t)" style="font-size:16px;vertical-align:middle">{{ getTypeIcon(t) }}</span> }
           {{ t === 'ALL' ? 'All Types' : getTypeLabel(t) }}
         </button>
       }
@@ -57,9 +57,9 @@
           <div class="vehicle-card" [class.inactive]="!v.isActive">
             <!-- Top bar -->
             <div class="vc-top">
-              <span class="vc-type-icon">{{ getTypeIcon(v.vehicleType) }}</span>
+              <span class="vc-type-icon material-icons-round" [style.color]="getTypeColor(v.vehicleType)">{{ getTypeIcon(v.vehicleType) }}</span>
               <div class="vc-badges">
-                @if (v.isEV) { <span class="vc-badge vc-ev">⚡ EV</span> }
+                @if (v.isEV) { <span class="vc-badge vc-ev">EV</span> }
                 @if (v.isActive) {
                   <span class="vc-badge vc-active">Active</span>
                 } @else {
@@ -99,7 +99,7 @@
       </div>
     } @else {
       <div class="empty-state">
-        <span class="empty-icon">🚗</span>
+        <span class="empty-icon material-icons-round" style="font-size:48px;color:#555">directions_car</span>
         <p class="empty-title">No vehicles yet</p>
         <p class="empty-sub">Add your first vehicle to get started</p>
         <button (click)="openAddModal()" class="add-btn mt-4">+ Add Vehicle</button>
@@ -114,7 +114,7 @@
         <h2 class="modal-title">{{ editingVehicle ? 'Edit Vehicle' : 'Register Vehicle' }}</h2>
 
         @if (formError) {
-          <div class="form-error">⚠️ {{ formError }}</div>
+          <div class="form-error">{{ formError }}</div>
         }
 
         <div class="form-grid">
@@ -138,15 +138,15 @@
           <div class="form-group">
             <label>Vehicle Type *</label>
             <select [(ngModel)]="form.vehicleType">
-              <option value="2W">🏍️ 2-Wheeler</option>
-              <option value="4W">🚗 4-Wheeler</option>
-              <option value="HEAVY">🚛 Heavy</option>
+              <option value="2W">2-Wheeler</option>
+              <option value="4W">4-Wheeler</option>
+              <option value="HEAVY">Heavy</option>
             </select>
           </div>
           <div class="form-group full-width">
             <label class="ev-toggle">
               <input type="checkbox" [(ngModel)]="form.isEV" />
-              <span>⚡ This is an Electric Vehicle (EV)</span>
+              <span>This is an Electric Vehicle (EV)</span>
             </label>
           </div>
         </div>

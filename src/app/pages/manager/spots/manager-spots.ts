@@ -48,7 +48,7 @@ export class ManagerSpotsComponent implements OnInit {
     private lotService: LotService,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.lotId = Number(this.route.snapshot.paramMap.get('lotId'));
@@ -177,12 +177,23 @@ export class ManagerSpotsComponent implements OnInit {
 
   getSpotTypeIcon(type: string): string {
     switch (type) {
-      case 'COMPACT': return '🚗';
-      case 'STANDARD': return '🚙';
-      case 'LARGE': return '🚐';
-      case 'MOTORBIKE': return '🏍️';
-      case 'EV': return '⚡';
-      default: return '🅿️';
+      case 'COMPACT': return 'local_taxi';
+      case 'STANDARD': return 'directions_car';
+      case 'LARGE': return 'local_shipping';
+      case 'MOTORBIKE': return 'two_wheeler';
+      case 'EV': return 'electric_car';
+      default: return 'local_parking';
+    }
+  }
+
+  getSpotTypeColor(type: string): string {
+    switch (type) {
+      case 'COMPACT': return '#60a5fa';
+      case 'STANDARD': return '#a78bfa';
+      case 'LARGE': return '#fbbf24';
+      case 'MOTORBIKE': return '#f472b6';
+      case 'EV': return '#34d399';
+      default: return '#94a3b8';
     }
   }
 

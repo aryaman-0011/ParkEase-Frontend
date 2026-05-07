@@ -1,0 +1,142 @@
+<div class="min-h-screen bg-neutral-950 text-white">
+  <app-navbar></app-navbar>
+
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-2xl font-bold tracking-tight mb-1">My Bookings</h1>
+      <p class="text-neutral-500 text-sm">View and manage all your parking bookings</p>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+      <div class="stat-card">
+        <p class="stat-value">{{ bookings.length }}</p>
+        <p class="stat-label">Total</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-value text-sky-400">{{ activeCount }}</p>
+        <p class="stat-label">Active</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-value text-emerald-400">{{ completedCount }}</p>
+        <p class="stat-label">Completed</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-value text-red-400">{{ cancelledCount }}</p>
+        <p class="stat-label">Cancelled</p>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
+      <button (click)="filterStatus = 'ALL'" [class]="filterStatus === 'ALL' ? 'filter-pill filter-active' : 'filter-pill'">All</button>
+      <button (click)="filterStatus = 'ACTIVE'" [class]="filterStatus === 'ACTIVE' ? 'filter-pill filter-active' : 'filter-pill'">
+        <span class="w-1.5 h-1.5 rounded-full bg-sky-400 inline-block mr-1"></span> Active
+      </button>
+      <button (click)="filterStatus = 'RESERVED'" [class]="filterStatus === 'RESERVED' ? 'filter-pill filter-active' : 'filter-pill'">
+        <span class="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block mr-1"></span> Reserved
+      </button>
+      <button (click)="filterStatus = 'COMPLETED'" [class]="filterStatus === 'COMPLETED' ? 'filter-pill filter-active' : 'filter-pill'">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block mr-1"></span> Completed
+      </button>
+      <button (click)="filterStatus = 'CANCELLED'" [class]="filterStatus === 'CANCELLED' ? 'filter-pill filter-active' : 'filter-pill'">
+        <span class="w-1.5 h-1.5 rounded-full bg-red-400 inline-block mr-1"></span> Cancelled
+      </button>
+    </div>
+
+    <!-- Bookings List -->
+    @if (!loading && filteredBookings.length > 0) {
+      <div class="space-y-3">
+        @for (b of filteredBookings; track b.bookingId) {
+          <div class="booking-card">
+            <div class="flex items-center gap-4">
+              <!-- Spot Badge -->
+              <div class="spot-badge">
+                <span class="spot-number">{{ b.spotNumber }}</span>
+              </div>
+
+              <!-- Details -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                  <p class="text-sm font-semibold truncate">{{ b.lotName }}</p>
+                  <span class="booking-status" [class]="getStatusClass(b.status)">
+                    @if (b.status === 'ACTIVE') {
+                      <span class="status-dot"></span>
+                    }
+                    {{ b.status }}
+                  </span>
+                </div>
+                <div class="flex items-center gap-3 text-[11px] text-neutral-600 flex-wrap">
+                  <span class="inline-flex items-center gap-1">
+                    <span class="material-icons-round" style="font-size:12px">directions_car</span>
+                    {{ b.vehiclePlate || 'No plate' }}
+                  </span>
+                  <span>·</span>
+                  <span class="inline-flex items-center gap-1">
+                    <span class="material-icons-round" style="font-size:12px">schedule</span>
+                    {{ getDuration(b) }}
+                  </span>
+                  <span>·</span>
+                  <span>{{ formatShortDate(b.scheduledStartTime) }}</span>
+                </div>
+              </div>
+
+              <!-- Price + Action -->
+              <div class="text-right shrink-0">
+                @if (b.totalCost !== null) {
+                  <p class="text-lg font-bold">₹{{ b.totalCost!.toFixed(0) }}</p>
+                } @else {
+                  <p class="text-sm font-semibold text-neutral-500">₹{{ b.pricePerHour }}/hr</p>
+                }
+                @if (b.status === 'ACTIVE' || b.status === 'RESERVED') {
+                  <a [routerLink]="['/lots', b.lotId, 'spots']" class="manage-link">Manage →</a>
+                }
+              </div>
+            </div>
+
+            <!-- Expanded timeline -->
+            <div class="booking-timeline">
+              <div class="timeline-item">
+                <span class="material-icons-round" style="font-size:14px;color:#666">login</span>
+                <span>{{ formatDate(b.scheduledStartTime) }}</span>
+              </div>
+              <div class="timeline-arrow">→</div>
+              <div class="timeline-item">
+                <span class="material-icons-round" style="font-size:14px;color:#666">logout</span>
+                <span>{{ formatDate(b.scheduledEndTime) }}</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Empty State -->
+    @if (!loading && filteredBookings.length === 0) {
+      <div class="text-center py-20">
+        <div class="w-20 h-20 bg-white/[0.03] border border-white/[0.06] rounded-2xl flex items-center justify-center mx-auto mb-5">
+          <span class="material-icons-round text-neutral-500" style="font-size:48px">event_note</span>
+        </div>
+        @if (filterStatus !== 'ALL') {
+          <p class="text-neutral-400 text-lg font-medium">No {{ filterStatus.toLowerCase() }} bookings</p>
+          <p class="text-neutral-600 text-sm mt-1">Try selecting a different filter</p>
+        } @else {
+          <p class="text-neutral-400 text-lg font-medium">No bookings yet</p>
+          <p class="text-neutral-600 text-sm mt-1">Find a parking spot and book it to get started</p>
+          <a routerLink="/lots/search" class="inline-block mt-4 text-sm text-sky-400 hover:underline">Find Parking →</a>
+        }
+      </div>
+    }
+
+    <!-- Loading Skeleton -->
+    @if (loading) {
+      <div class="space-y-3">
+        @for (i of [1,2,3,4,5]; track i) {
+          <div class="booking-skeleton"></div>
+        }
+      </div>
+    }
+  </div>
+</div>

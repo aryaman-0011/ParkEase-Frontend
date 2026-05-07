@@ -6,12 +6,14 @@ import { AdminService } from '../../services/admin.service';
 import { LotService } from '../../services/lot.service';
 import { BookingService } from '../../services/booking.service';
 import { PaymentService } from '../../services/payment.service';
+import { VehicleService } from '../../services/vehicle.service';
 import { UserResponse } from '../../models/auth.model';
 import { UserStatsResponse } from '../../models/admin.model';
 import { LotResponse } from '../../models/lot.model';
 import { BookingResponse } from '../../models/booking.model';
 import { PaymentResponse } from '../../models/payment.model';
 import { NavbarComponent } from '../../components/navbar/navbar';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-dashboard',
@@ -33,6 +35,7 @@ export class DashboardComponent implements OnInit {
   recentBookings: BookingResponse[] = [];
   totalSpent = 0;
   recentPayments: PaymentResponse[] = [];
+  vehicleCount = 0;
 
   // Admin data
   adminStats: UserStatsResponse | null = null;
@@ -45,6 +48,7 @@ export class DashboardComponent implements OnInit {
     private lotService: LotService,
     private bookingService: BookingService,
     private paymentService: PaymentService,
+    private vehicleService: VehicleService,
     private router: Router,
     private cdr: ChangeDetectorRef,
   ) {}
@@ -128,6 +132,12 @@ export class DashboardComponent implements OnInit {
         this.cdr.detectChanges();
       },
     });
+    this.vehicleService.getVehiclesByOwner(this.user.id).subscribe({
+      next: (vehicles) => {
+        this.vehicleCount = vehicles.filter((v: any) => v.isActive).length;
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   getGreeting(): string {
@@ -152,6 +162,12 @@ export class DashboardComponent implements OnInit {
 
   getInitials(): string {
     return (this.user?.fullName || '').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  getAvatarUrl(): string | null {
+    if (!this.user?.profilePicUrl) return null;
+    if (this.user.profilePicUrl.startsWith('http')) return this.user.profilePicUrl;
+    return `${environment.apiUrl}${this.user.profilePicUrl}`;
   }
 
   logout(): void {

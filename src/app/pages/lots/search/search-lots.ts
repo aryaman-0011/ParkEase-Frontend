@@ -15,6 +15,7 @@ import { NavbarComponent } from '../../../components/navbar/navbar';
 })
 export class SearchLotsComponent implements OnInit {
   lots: LotResponse[] = [];
+  featuredLots: LotResponse[] = [];
   searchCity = '';
   searchLabel = '';
   loading = false;
@@ -25,8 +26,16 @@ export class SearchLotsComponent implements OnInit {
   constructor(private lotService: LotService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
-    // Auto-detect location and show nearby lots on page load
-    this.findNearby(true);
+    // Load all approved lots as featured to avoid empty page
+    this.lotService.getAllApprovedLots().subscribe({
+      next: (lots) => {
+        this.featuredLots = Array.isArray(lots) ? lots : [];
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.featuredLots = [];
+      },
+    });
   }
 
   searchByCity(): void {

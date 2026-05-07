@@ -304,3 +304,44 @@ select option {
   background: #171717;
   color: #d4d4d4;
 }
+
+/* ═══════ LIGHT THEME ═══════ */
+:host-context([data-theme="light"]) .stat-card { background: #efe5d8; border-color: rgba(60,45,25,0.08); }
+:host-context([data-theme="light"]) .stat-card:hover { border-color: rgba(60,45,25,0.15); box-shadow: 0 8px 24px rgba(60,45,25,0.05); }
+:host-context([data-theme="light"]) .stat-value { color: #3b2e1e; }
+:host-context([data-theme="light"]) .stat-label { color: #a19178; }
+
+:host-context([data-theme="light"]) .table-card { background: #efe5d8; border-color: rgba(60,45,25,0.08); }
+:host-context([data-theme="light"]) .table-card:hover { border-color: rgba(60,45,25,0.12); }
+
+:host-context([data-theme="light"]) .avatar { background: #d5c8b8; color: #7d6c55; }
+
+:host-context([data-theme="light"]) .badge-driver { background: rgba(59,130,246,0.06); color: #2563eb; }
+:host-context([data-theme="light"]) .badge-manager { background: rgba(245,158,11,0.06); color: #d97706; }
+:host-context([data-theme="light"]) .badge-admin { background: rgba(168,85,247,0.06); color: #7c3aed; }
+:host-context([data-theme="light"]) .badge-active { background: rgba(34,197,94,0.06); color: #059669; }
+:host-context([data-theme="light"]) .badge-suspended { background: rgba(239,68,68,0.06); color: #dc2626; }
+
+:host-context([data-theme="light"]) .action-btn { border-color: rgba(60,45,25,0.08); background: rgba(60,45,25,0.03); color: #8f7e67; }
+:host-context([data-theme="light"]) .action-btn:hover { background: rgba(60,45,25,0.08); color: #3b2e1e; border-color: rgba(60,45,25,0.15); }
+
+:host-context([data-theme="light"]) .mobile-action-btn { border-color: rgba(60,45,25,0.08); background: rgba(60,45,25,0.03); color: #8f7e67; }
+:host-context([data-theme="light"]) .mobile-action-btn:hover { background: rgba(60,45,25,0.06); }
+
+:host-context([data-theme="light"]) .pagination-btn { border-color: rgba(60,45,25,0.08); background: rgba(60,45,25,0.03); color: #8f7e67; }
+:host-context([data-theme="light"]) .pagination-btn:hover:not(:disabled) { background: rgba(60,45,25,0.08); color: #3b2e1e; }
+
+:host-context([data-theme="light"]) .modal-overlay { background: rgba(50,38,22,0.25); }
+:host-context([data-theme="light"]) .modal-card { background: #efe5d8; border-color: rgba(60,45,25,0.1); }
+:host-context([data-theme="light"]) .modal-footer { border-color: rgba(60,45,25,0.08); }
+:host-context([data-theme="light"]) .modal-btn-cancel { border-color: rgba(60,45,25,0.1); color: #8f7e67; }
+:host-context([data-theme="light"]) .modal-btn-cancel:hover { background: rgba(60,45,25,0.05); color: #3b2e1e; }
+:host-context([data-theme="light"]) .modal-btn-confirm { background: #3b2e1e; color: #efe5d8; }
+:host-context([data-theme="light"]) .modal-btn-confirm:hover { background: #4d3d2a; }
+
+:host-context([data-theme="light"]) .role-option { background: #dfd3c4; border-color: rgba(60,45,25,0.1); color: #a19178; }
+:host-context([data-theme="light"]) .role-option:hover { background: #d5c8b8; color: #6b5a45; }
+:host-context([data-theme="light"]) .role-option-active { background: #3b2e1e; color: #efe5d8; border-color: #3b2e1e; }
+
+:host-context([data-theme="light"]) select option { background: #efe5d8; color: #4d3d2a; }
+

@@ -43,7 +43,7 @@
       </div>
       <button (click)="showBulkModal = true"
         class="bg-white text-neutral-900 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-neutral-200 active:scale-[0.97] transition-all flex items-center gap-2">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        <span class="material-icons-round" style="font-size:16px">add</span>
         Add Spots
       </button>
     </div>
@@ -67,7 +67,7 @@
     <!-- Empty -->
     @if (!loading && spots.length === 0) {
       <div class="text-center py-20">
-        <p class="text-5xl mb-4">🅿️</p>
+        <span class="material-icons-round text-neutral-500" style="font-size:48px">local_parking</span>
         <p class="text-neutral-500 text-lg">No spots yet</p>
         <p class="text-neutral-600 text-sm mt-1">Click "Add Spots" to create parking spots for this lot</p>
       </div>
@@ -95,7 +95,7 @@
             <!-- Row 3: Info -->
             <div class="text-[11px] text-neutral-600 space-y-1">
               <div class="flex items-center justify-between">
-                <span>{{ getSpotTypeIcon(spot.spotType) }} Floor {{ spot.floor }}</span>
+                <span><span class="material-icons-round" [style.color]="getSpotTypeColor(spot.spotType)" style="font-size:14px;vertical-align:middle">{{ getSpotTypeIcon(spot.spotType) }}</span> Floor {{ spot.floor }}</span>
                 @if (spot.pricePerHour) {
                   <span class="text-neutral-400 font-medium">₹{{ spot.pricePerHour }}</span>
                 }
@@ -103,7 +103,7 @@
               @if (spot.isHandicapped || spot.isEVCharging) {
                 <div class="flex gap-2 text-[10px]">
                   @if (spot.isHandicapped) { <span class="text-blue-400/60">♿</span> }
-                  @if (spot.isEVCharging) { <span class="text-green-400/60">⚡</span> }
+                  @if (spot.isEVCharging) { <span class="text-green-400/60 material-icons-round" style="font-size:12px">bolt</span> }
                 </div>
               }
             </div>
@@ -114,7 +114,7 @@
                 <button (click)="releaseSpot(spot)" class="act-btn act-release">Free</button>
               }
               <button (click)="deleteSpot(spot)" class="act-btn act-delete">
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                <span class="material-icons-round" style="font-size:14px">delete</span>
               </button>
             </div>
           </div>
@@ -187,7 +187,7 @@
             </label>
             <label class="flex items-center gap-2 text-sm text-neutral-400 cursor-pointer">
               <input type="checkbox" [(ngModel)]="bulkForm.isEVCharging" name="isEVCharging" class="accent-green-500" />
-              ⚡ EV Charging
+              EV Charging
             </label>
           </div>
 

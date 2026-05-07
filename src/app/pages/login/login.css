@@ -1,1 +1,10 @@
 /* Login component styles */
+
+/* ═══════ LIGHT THEME ═══════ */
+/* P logo box */
+:host-context([data-theme="light"]) .w-10.h-10.bg-white {
+  background-color: #8B5E3C !important;
+}
+:host-context([data-theme="light"]) .w-10.h-10.bg-white .text-neutral-900 {
+  color: #fef7f0 !important;
+}

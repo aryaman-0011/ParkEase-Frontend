@@ -1,65 +1,149 @@
 <nav class="navbar">
   <div class="navbar-inner">
     <!-- Logo -->
-    <a routerLink="/dashboard" class="nb-logo">
+    <a [routerLink]="user ? '/dashboard' : '/'" class="nb-logo">
       <div class="nb-logo-box"><span>P</span></div>
       <span class="nb-logo-text">ParkEase</span>
     </a>
 
     <!-- Center links -->
     <div class="nb-links">
-      <a routerLink="/dashboard" class="nb-link" [class.nb-link-active]="activePage === 'home'" routerLinkActive="nb-link-active" [routerLinkActiveOptions]="{exact: true}">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
-        <span>Home</span>
-      </a>
-      @if (user?.role === 'DRIVER') {
+      @if (user) {
+        <a routerLink="/dashboard" class="nb-link" [class.nb-link-active]="activePage === 'home'" routerLinkActive="nb-link-active" [routerLinkActiveOptions]="{exact: true}">
+          <span class="material-icons-round" style="font-size:18px">home</span>
+          <span>Home</span>
+        </a>
+      }
+      @if (!user || user.role === 'DRIVER') {
         <a routerLink="/lots/search" class="nb-link" routerLinkActive="nb-link-active">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+          <span class="material-icons-round" style="font-size:18px">search</span>
           <span>Find Parking</span>
         </a>
+      }
+      @if (user?.role === 'DRIVER') {
+        <a routerLink="/bookings" class="nb-link" routerLinkActive="nb-link-active">
+          <span class="material-icons-round" style="font-size:18px">event_note</span>
+          <span>Bookings</span>
+        </a>
         <a routerLink="/payments" class="nb-link" routerLinkActive="nb-link-active">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+          <span class="material-icons-round" style="font-size:18px">credit_card</span>
           <span>Payments</span>
         </a>
         <a routerLink="/vehicles" class="nb-link" routerLinkActive="nb-link-active">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0H18.75M20.625 4.5H3.375m17.25 0A1.125 1.125 0 0121.75 5.625V14.25m0 0h-2.25m-9-7.5h6"/></svg>
+          <span class="material-icons-round" style="font-size:18px">directions_car</span>
           <span>My Vehicles</span>
         </a>
       }
       @if (user?.role === 'MANAGER') {
         <a routerLink="/manager/lots" class="nb-link" routerLinkActive="nb-link-active">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21"/></svg>
+          <span class="material-icons-round" style="font-size:18px">domain</span>
           <span>My Lots</span>
         </a>
       }
       @if (user?.role === 'ADMIN') {
         <a routerLink="/admin/users" class="nb-link" routerLinkActive="nb-link-active">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+          <span class="material-icons-round" style="font-size:18px">group</span>
           <span>Users</span>
         </a>
         <a routerLink="/admin/lots" class="nb-link" routerLinkActive="nb-link-active">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/></svg>
+          <span class="material-icons-round" style="font-size:18px">apartment</span>
           <span>Lots</span>
         </a>
       }
-      <a routerLink="/settings" class="nb-link" routerLinkActive="nb-link-active">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-        <span>Settings</span>
-      </a>
+      @if (user) {
+        <a routerLink="/settings" class="nb-link" routerLinkActive="nb-link-active">
+          <span class="material-icons-round" style="font-size:18px">settings</span>
+          <span>Settings</span>
+        </a>
+      }
     </div>
 
-    <!-- Right: user pill + sign out -->
+    <!-- Right: theme toggle + notification bell + user pill + sign out -->
     <div class="nb-right">
-      <div class="nb-user-pill">
-        <div class="nb-avatar">{{ getInitials() }}</div>
-        <span class="nb-user-name">{{ getFirstName() }}</span>
-        @if (user?.role === 'ADMIN') { <span class="nb-role-dot bg-purple-400"></span> }
-        @if (user?.role === 'MANAGER') { <span class="nb-role-dot bg-amber-400"></span> }
-        @if (user?.role === 'DRIVER') { <span class="nb-role-dot bg-sky-400"></span> }
-      </div>
-      <button (click)="logout()" class="nb-signout" title="Sign Out">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/></svg>
+      <!-- Theme toggle (always visible) -->
+      <button class="nb-theme-toggle" (click)="toggleTheme()" [title]="isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
+        <span class="material-icons-round" style="font-size:18px">{{ isDark ? 'light_mode' : 'dark_mode' }}</span>
       </button>
+
+      @if (user) {
+        <!-- Notification bell with dropdown -->
+        <div class="nb-notif-wrapper">
+          <button class="nb-bell" (click)="toggleNotifDropdown($event)" title="Notifications" [class.nb-bell-active]="showNotifDropdown">
+            <span class="material-icons-round" style="font-size:18px">notifications</span>
+            @if (unreadCount > 0) {
+              <span class="nb-bell-badge">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+            }
+          </button>
+
+          <!-- Dropdown panel -->
+          @if (showNotifDropdown) {
+            <div class="notif-dropdown">
+              <div class="notif-dropdown-header">
+                <span class="notif-dropdown-title">Notifications</span>
+                @if (unreadCount > 0) {
+                  <button class="notif-mark-all" (click)="markAllRead($event)">Mark all read</button>
+                }
+              </div>
+
+              <div class="notif-dropdown-body">
+                @if (loadingNotifs) {
+                  <div class="notif-loading">
+                    <div class="notif-spinner"></div>
+                  </div>
+                } @else if (notifications.length === 0) {
+                  <div class="notif-empty">
+                    <span class="material-icons-round notif-empty-icon" style="font-size:32px;color:#444">notifications_off</span>
+                    <p>No notifications</p>
+                  </div>
+                } @else {
+                  @for (n of notifications.slice(0, 5); track n.id) {
+                    <div class="notif-item" [class.notif-unread]="!n.read" (click)="markAsRead(n, $event)">
+                      <span class="notif-item-icon material-icons-round" [style.color]="getIconColor(n.type)" style="font-size:20px">{{ getIconName(n.type) }}</span>
+                      <div class="notif-item-content">
+                        <div class="notif-item-title">{{ n.title }}</div>
+                        <div class="notif-item-msg">{{ n.message }}</div>
+                        <div class="notif-item-time">{{ getTimeAgo(n.sentAt) }}</div>
+                      </div>
+                      <button class="notif-item-delete" (click)="deleteNotif(n.id, $event)" title="Delete">✕</button>
+                    </div>
+                  }
+                }
+              </div>
+
+              <div class="notif-dropdown-footer">
+                <button class="notif-view-all" (click)="viewAll()">View All Notifications →</button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="nb-user-pill">
+          <div class="nb-avatar">
+            @if (getAvatarUrl()) {
+              <img [src]="getAvatarUrl()" alt="" class="nb-avatar-img" />
+            } @else {
+              {{ getInitials() }}
+            }
+          </div>
+          <span class="nb-user-name">{{ getFirstName() }}</span>
+          @if (user.role === 'ADMIN') { <span class="nb-role-dot bg-purple-400"></span> }
+          @if (user.role === 'MANAGER') { <span class="nb-role-dot bg-amber-400"></span> }
+          @if (user.role === 'DRIVER') { <span class="nb-role-dot bg-sky-400"></span> }
+        </div>
+        <button (click)="logout()" class="nb-signout" title="Sign Out">
+          <span class="material-icons-round" style="font-size:18px">logout</span>
+        </button>
+      } @else {
+        <!-- Guest: Login / Sign Up -->
+        <a routerLink="/login" class="nb-guest-btn nb-login-btn">
+          <span class="material-icons-round" style="font-size:16px">login</span>
+          Log In
+        </a>
+        <a routerLink="/signup" class="nb-guest-btn nb-signup-btn">
+          <span class="material-icons-round" style="font-size:16px">person_add</span>
+          Sign Up
+        </a>
+      }
     </div>
   </div>
 </nav>

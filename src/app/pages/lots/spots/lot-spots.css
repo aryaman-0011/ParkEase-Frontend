@@ -397,3 +397,66 @@
   .active-bookings-grid { grid-template-columns: 1fr; }
   .form-row-bm { grid-template-columns: 1fr; }
 }
+
+/* ═══════ LIGHT THEME ═══════ */
+:host-context([data-theme="light"]) .filter-pill-active { color: #3b2e1e; background: rgba(60,45,25,0.06); border-color: rgba(60,45,25,0.12); }
+:host-context([data-theme="light"]) .filter-pill:hover { color: #6b5a45; }
+
+:host-context([data-theme="light"]) .spot-tile { background: #efe5d8; border-color: rgba(60,45,25,0.08); }
+:host-context([data-theme="light"]) .spot-tile:hover { border-color: rgba(60,45,25,0.18); box-shadow: 0 4px 16px rgba(60,45,25,0.06); }
+:host-context([data-theme="light"]) .spot-tile .text-white { color: #3b2e1e !important; }
+:host-context([data-theme="light"]) .spot-tile .text-neutral-600 { color: #a19178 !important; }
+:host-context([data-theme="light"]) .spot-tile .text-neutral-500 { color: #8f7e67 !important; }
+:host-context([data-theme="light"]) .spot-tile .text-neutral-400 { color: #7d6c55 !important; }
+
+:host-context([data-theme="light"]) .spot-tile.spot-reserved { border-color: rgba(234,179,8,0.3); background: linear-gradient(135deg, rgba(234,179,8,0.06) 0%, #efe5d8 100%); box-shadow: none; }
+:host-context([data-theme="light"]) .spot-tile.spot-occupied { border-color: rgba(239,68,68,0.3); background: linear-gradient(135deg, rgba(239,68,68,0.04) 0%, #efe5d8 100%); box-shadow: none; }
+:host-context([data-theme="light"]) .spot-tile.spot-mine { border-color: rgba(139,94,60,0.35) !important; background: linear-gradient(135deg, rgba(139,94,60,0.06) 0%, #efe5d8 100%) !important; box-shadow: none !important; }
+
+:host-context([data-theme="light"]) .spot-skeleton { background: rgba(60,45,25,0.03); border-color: rgba(60,45,25,0.06); }
+
+:host-context([data-theme="light"]) .booking-card { background: #efe5d8; border-color: rgba(60,45,25,0.08); }
+
+:host-context([data-theme="light"]) .time-slot-bar { background: #dfd3c4; border-color: rgba(60,45,25,0.08); }
+:host-context([data-theme="light"]) .time-slot-value { color: #4d3d2a; }
+:host-context([data-theme="light"]) .time-slot-label { color: #a19178; }
+
+:host-context([data-theme="light"]) .booking-btn-cancel { border-color: rgba(60,45,25,0.1); color: #8f7e67; }
+:host-context([data-theme="light"]) .booking-btn-cancel:hover:not(:disabled) { color: #ef4444; border-color: rgba(239,68,68,0.2); }
+
+:host-context([data-theme="light"]) .receipt-overlay { background: rgba(50,38,22,0.25); }
+:host-context([data-theme="light"]) .receipt-card { background: #efe5d8; border-color: rgba(60,45,25,0.1); box-shadow: 0 24px 64px rgba(60,45,25,0.1); }
+:host-context([data-theme="light"]) .receipt-rows { border-color: rgba(60,45,25,0.08); }
+:host-context([data-theme="light"]) .receipt-row + .receipt-row { border-color: rgba(60,45,25,0.06); }
+
+:host-context([data-theme="light"]) .form-group-bm input,
+:host-context([data-theme="light"]) .form-group-bm select { background: #dfd3c4; border-color: rgba(60,45,25,0.1); color: #3b2e1e; }
+:host-context([data-theme="light"]) .form-group-bm input:focus,
+:host-context([data-theme="light"]) .form-group-bm select:focus { background: #efe5d8; border-color: rgba(139,94,60,0.4); }
+:host-context([data-theme="light"]) .form-group-bm select option { background: #efe5d8; color: #3b2e1e; }
+:host-context([data-theme="light"]) .form-group-bm label { color: #a19178; }
+
+:host-context([data-theme="light"]) .cost-estimate { background: #e3d8ca; border-color: rgba(60,45,25,0.08); }
+:host-context([data-theme="light"]) .cost-row { color: #6b5a45; }
+:host-context([data-theme="light"]) .cost-row + .cost-row { border-color: rgba(60,45,25,0.06); }
+
+:host-context([data-theme="light"]) .pay-method-btn { background: #e3d8ca; border-color: rgba(60,45,25,0.08); color: #4d3d2a; }
+:host-context([data-theme="light"]) .pay-cash:hover { background: rgba(139,94,60,0.06); border-color: rgba(139,94,60,0.2); }
+:host-context([data-theme="light"]) .pay-online:hover { background: rgba(59,130,246,0.06); border-color: rgba(59,130,246,0.2); }
+
+:host-context([data-theme="light"]) .book-spot-btn {
+  background: #8B5E3C !important;
+  color: #fef7f0 !important;
+  border-color: #8B5E3C !important;
+}
+:host-context([data-theme="light"]) .book-spot-btn:hover:not(:disabled) {
+  background: #7a5034 !important;
+}
+:host-context([data-theme="light"]) .book-spot-btn-alt {
+  background: rgba(59,130,246,0.1) !important;
+  color: #2563eb !important;
+  border-color: rgba(59,130,246,0.2) !important;
+}
+:host-context([data-theme="light"]) .book-spot-btn-alt:hover:not(:disabled) {
+  background: rgba(59,130,246,0.18) !important;
+}

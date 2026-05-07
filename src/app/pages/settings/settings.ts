@@ -1,10 +1,11 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { UserResponse } from '../../models/auth.model';
 import { NavbarComponent } from '../../components/navbar/navbar';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-settings',
@@ -19,6 +20,11 @@ export class SettingsComponent implements OnInit {
   loading = false;
   success = '';
   error = '';
+
+  // Avatar
+  @ViewChild('avatarInput') avatarInput!: ElementRef<HTMLInputElement>;
+  avatarUploading = false;
+  avatarError = '';
 
   // Profile fields
   fullName = '';
@@ -82,6 +88,74 @@ export class SettingsComponent implements OnInit {
       error: (err) => {
         this.loading = false;
         this.error = err.error?.message || 'Failed to update profile';
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  // ── Avatar ──
+  getAvatarUrl(): string | null {
+    if (!this.user?.profilePicUrl) return null;
+    if (this.user.profilePicUrl.startsWith('http')) return this.user.profilePicUrl;
+    return `${environment.apiUrl}${this.user.profilePicUrl}`;
+  }
+
+  getInitials(): string {
+    if (!this.user?.fullName) return '?';
+    return this.user.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  }
+
+  triggerAvatarUpload(): void {
+    this.avatarInput.nativeElement.click();
+  }
+
+  onAvatarSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+
+    if (file.size > 2 * 1024 * 1024) {
+      this.avatarError = 'Image must be under 2 MB';
+      this.cdr.detectChanges();
+      return;
+    }
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
+      this.avatarError = 'Only JPEG, PNG, WebP, or GIF allowed';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.avatarError = '';
+    this.avatarUploading = true;
+    this.authService.uploadProfilePicture(file).subscribe({
+      next: (user) => {
+        this.user = user;
+        this.avatarUploading = false;
+        this.success = 'Profile picture updated';
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.avatarUploading = false;
+        this.avatarError = err.error?.message || 'Upload failed';
+        this.cdr.detectChanges();
+      },
+    });
+    input.value = ''; // reset
+  }
+
+  removeAvatar(): void {
+    this.avatarError = '';
+    this.avatarUploading = true;
+    this.authService.removeProfilePicture().subscribe({
+      next: (user) => {
+        this.user = user;
+        this.avatarUploading = false;
+        this.success = 'Profile picture removed';
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.avatarUploading = false;
+        this.avatarError = err.error?.message || 'Failed to remove picture';
         this.cdr.detectChanges();
       },
     });

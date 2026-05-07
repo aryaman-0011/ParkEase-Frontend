@@ -285,3 +285,54 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
 }
+
+/* ═══════ LIGHT THEME ═══════ */
+:host-context([data-theme="light"]) .lot-card {
+  background: #efe5d8;
+  border-color: rgba(60,45,25,0.12);
+  box-shadow: 0 2px 8px rgba(60,45,25,0.06);
+}
+:host-context([data-theme="light"]) .lot-card:hover {
+  border-color: rgba(60,45,25,0.22);
+  box-shadow: 0 12px 40px rgba(60,45,25,0.12), 0 0 0 1px rgba(60,45,25,0.06);
+}
+:host-context([data-theme="light"]) .lot-card-header {
+  background: linear-gradient(135deg, rgba(60,45,25,0.06) 0%, rgba(60,45,25,0.02) 100%);
+}
+:host-context([data-theme="light"]) .spots-bar-bg {
+  background: rgba(60,45,25,0.1);
+}
+
+/* Skeleton cards */
+:host-context([data-theme="light"]) .skeleton-card {
+  background: #efe5d8;
+  border-color: rgba(60,45,25,0.12);
+}
+:host-context([data-theme="light"]) .skeleton-image {
+  background: rgba(60,45,25,0.08);
+}
+:host-context([data-theme="light"]) .skeleton-shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(60,45,25,0.06) 40%, rgba(60,45,25,0.1) 50%, rgba(60,45,25,0.06) 60%, transparent 100%);
+}
+:host-context([data-theme="light"]) .skeleton-line {
+  background: rgba(60,45,25,0.08);
+}
+:host-context([data-theme="light"]) .skeleton-line::after {
+  background: linear-gradient(90deg, transparent 0%, rgba(60,45,25,0.06) 40%, rgba(60,45,25,0.1) 50%, rgba(60,45,25,0.06) 60%, transparent 100%);
+}
+
+/* Empty state */
+:host-context([data-theme="light"]) .empty-icon-wrapper {
+  background: rgba(60,45,25,0.06);
+  border-color: rgba(60,45,25,0.1);
+}
+
+/* View Available Spots button */
+:host-context([data-theme="light"]) a[class*="bg-emerald"] {
+  background: #8B5E3C !important;
+  color: #fef7f0 !important;
+  border-color: #8B5E3C !important;
+}
+:host-context([data-theme="light"]) a[class*="bg-emerald"]:hover {
+  background: #7a5034 !important;
+}

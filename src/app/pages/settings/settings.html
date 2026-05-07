@@ -12,7 +12,7 @@
         [class]="activeTab === 'profile' ? 'tab-active' : 'tab-inactive'"
         class="tab-btn"
       >
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+        <span class="material-icons-round" style="font-size:18px">person</span>
         Profile
       </button>
       <button
@@ -22,7 +22,7 @@
         [disabled]="user?.provider !== 'LOCAL'"
         [title]="user?.provider !== 'LOCAL' ? 'Password change is not available for social login accounts' : ''"
       >
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+        <span class="material-icons-round" style="font-size:18px">lock</span>
         Password
       </button>
       <button
@@ -30,7 +30,7 @@
         [class]="activeTab === 'danger' ? 'tab-active tab-danger' : 'tab-inactive'"
         class="tab-btn"
       >
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+        <span class="material-icons-round" style="font-size:18px">warning</span>
         Danger Zone
       </button>
     </div>
@@ -38,13 +38,13 @@
     <!-- Alerts -->
     @if (success) {
       <div class="mb-6 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3 flex items-center gap-3">
-        <svg class="w-5 h-5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span class="material-icons-round text-emerald-400" style="font-size:20px">check_circle</span>
         <span class="text-emerald-400 text-sm">{{ success }}</span>
       </div>
     }
     @if (error) {
       <div class="mb-6 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 flex items-center gap-3">
-        <svg class="w-5 h-5 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span class="material-icons-round text-red-400" style="font-size:20px">error</span>
         <span class="text-red-400 text-sm">{{ error }}</span>
       </div>
     }
@@ -56,6 +56,39 @@
           <h2 class="text-lg font-semibold">Edit Profile</h2>
           <p class="text-neutral-500 text-sm mt-1">Update your personal information</p>
         </div>
+
+        <!-- Avatar Upload -->
+        <div class="avatar-section">
+          <div class="avatar-wrapper" (click)="triggerAvatarUpload()">
+            @if (getAvatarUrl()) {
+              <img [src]="getAvatarUrl()" alt="Profile" class="avatar-img" />
+            } @else {
+              <span class="avatar-initials">{{ getInitials() }}</span>
+            }
+            <div class="avatar-overlay">
+              @if (avatarUploading) {
+                <svg class="animate-spin" style="width:20px;height:20px" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+              } @else {
+                <span class="material-icons-round" style="font-size:20px">photo_camera</span>
+              }
+            </div>
+          </div>
+          <input #avatarInput type="file" accept="image/jpeg,image/png,image/webp,image/gif" (change)="onAvatarSelected($event)" class="hidden" />
+          <div class="avatar-info">
+            <p class="avatar-name">{{ user?.fullName }}</p>
+            <p class="avatar-hint">Click avatar to upload · Max 2 MB</p>
+            @if (getAvatarUrl()) {
+              <button (click)="removeAvatar()" [disabled]="avatarUploading" class="avatar-remove-btn">
+                <span class="material-icons-round" style="font-size:14px">delete</span>
+                Remove photo
+              </button>
+            }
+            @if (avatarError) {
+              <p class="avatar-error">{{ avatarError }}</p>
+            }
+          </div>
+        </div>
+
         <div class="card-body">
           <!-- Email (read-only) -->
           <div class="field">
@@ -118,9 +151,9 @@
                 <input [type]="showCurrentPassword ? 'text' : 'password'" [(ngModel)]="currentPassword" name="currentPassword" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" class="input pr-12" />
                 <button type="button" (click)="showCurrentPassword = !showCurrentPassword" class="eye-btn">
                   @if (showCurrentPassword) {
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
+                    <span class="material-icons-round" style="font-size:20px">visibility_off</span>
                   } @else {
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span class="material-icons-round" style="font-size:20px">visibility</span>
                   }
                 </button>
               </div>
@@ -133,9 +166,9 @@
                 <input [type]="showNewPassword ? 'text' : 'password'" [(ngModel)]="newPassword" name="newPassword" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" class="input pr-12" />
                 <button type="button" (click)="showNewPassword = !showNewPassword" class="eye-btn">
                   @if (showNewPassword) {
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
+                    <span class="material-icons-round" style="font-size:20px">visibility_off</span>
                   } @else {
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span class="material-icons-round" style="font-size:20px">visibility</span>
                   }
                 </button>
               </div>
@@ -169,7 +202,7 @@
           <div class="card-header">
             <div class="flex items-center gap-3">
               <div class="deactivate-icon-wrapper">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                <span class="material-icons-round" style="font-size:20px">block</span>
               </div>
               <div>
                 <h2 class="text-lg font-semibold text-amber-400">Deactivate Account</h2>
@@ -211,7 +244,7 @@
                   <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                   Deactivating...
                 } @else {
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                  <span class="material-icons-round" style="font-size:16px">block</span>
                   Deactivate Account
                 }
               </button>
@@ -224,7 +257,7 @@
           <div class="card-header">
             <div class="flex items-center gap-3">
               <div class="delete-icon-wrapper">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                <span class="material-icons-round" style="font-size:20px">delete_forever</span>
               </div>
               <div>
                 <h2 class="text-lg font-semibold text-red-400">Delete Account</h2>
@@ -237,16 +270,16 @@
               <h3 class="text-white font-medium mb-3 text-sm">This will permanently delete:</h3>
               <ul class="space-y-2 text-sm text-neutral-400">
                 <li class="flex items-start gap-2">
-                  <svg class="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  <span class="material-icons-round text-red-400" style="font-size:16px">delete</span>
                   Profile and personal information
                 </li>
                 <li class="flex items-start gap-2">
-                  <svg class="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  <span class="material-icons-round text-red-400" style="font-size:16px">delete</span>
                   Booking history and reservations
                 </li>
                 @if (user?.role === 'MANAGER') {
                   <li class="flex items-start gap-2">
-                    <svg class="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    <span class="material-icons-round text-red-400" style="font-size:16px">delete</span>
                     All managed parking lots
                   </li>
                 }
@@ -259,7 +292,7 @@
                 [disabled]="loading"
                 class="btn-delete"
               >
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                <span class="material-icons-round" style="font-size:16px">delete_forever</span>
                 Delete Account Permanently
               </button>
             </div>
@@ -273,7 +306,7 @@
       <div class="modal-overlay" (click)="closeDeleteModal()">
         <div class="modal-content" (click)="$event.stopPropagation()">
           <div class="modal-icon-wrapper">
-            <svg class="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+            <span class="material-icons-round text-red-400" style="font-size:32px">warning</span>
           </div>
           <h3 class="text-xl font-bold text-white mt-4 mb-2">Are you absolutely sure?</h3>
           <p class="text-neutral-400 text-sm mb-6">
@@ -283,7 +316,7 @@
 
           @if (error && showDeleteModal) {
             <div class="mb-4 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 flex items-center gap-3">
-              <svg class="w-5 h-5 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span class="material-icons-round text-red-400" style="font-size:20px">error</span>
               <span class="text-red-400 text-sm">{{ error }}</span>
             </div>
           }

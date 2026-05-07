@@ -50,7 +50,7 @@
     @if (!loading && filteredPayments.length > 0) {
       <div class="space-y-3">
         @for (p of filteredPayments; track p.paymentId) {
-          <div class="payment-card">
+          <div class="payment-card" (click)="openReceipt(p)">
             <div class="flex items-center gap-4">
               <!-- Method Icon -->
               <div class="pay-icon">
@@ -83,6 +83,9 @@
                 </p>
                 <p class="text-[10px] text-neutral-600 font-mono">{{ p.transactionId }}</p>
               </div>
+
+              <!-- Receipt icon hint -->
+              <span class="material-icons-round receipt-hint" style="font-size:18px">receipt_long</span>
             </div>
           </div>
         }
@@ -93,7 +96,7 @@
     @if (!loading && filteredPayments.length === 0) {
       <div class="text-center py-20">
         <div class="w-20 h-20 bg-white/[0.03] border border-white/[0.06] rounded-2xl flex items-center justify-center mx-auto mb-5">
-          <span class="text-4xl">💳</span>
+          <span class="material-icons-round text-neutral-500" style="font-size:48px">credit_card</span>
         </div>
         @if (filterStatus !== 'ALL') {
           <p class="text-neutral-400 text-lg font-medium">No {{ filterStatus.toLowerCase() }} payments</p>
@@ -115,4 +118,126 @@
       </div>
     }
   </div>
+
+  <!-- ═══════ RECEIPT MODAL ═══════ -->
+  @if (showReceipt && receiptPayment) {
+    <div class="receipt-overlay" (click)="closeReceipt()">
+      <div class="receipt-modal" (click)="$event.stopPropagation()">
+        <!-- Close -->
+        <button class="receipt-close" (click)="closeReceipt()">
+          <span class="material-icons-round" style="font-size:20px">close</span>
+        </button>
+
+        <!-- Header -->
+        <div class="receipt-header">
+          <div>
+            <h3 class="receipt-brand">ParkEase</h3>
+            <p class="receipt-subtitle">Payment Receipt</p>
+          </div>
+          <div class="receipt-header-right">
+            <span class="receipt-number">{{ receiptPayment.receiptNumber }}</span>
+            <span class="receipt-status"
+              [class]="receiptPayment.status === 'SUCCESS' ? 'receipt-status-success' :
+                       receiptPayment.status === 'REFUNDED' ? 'receipt-status-refunded' :
+                       receiptPayment.status === 'FAILED' ? 'receipt-status-failed' :
+                       'receipt-status-pending'">
+              {{ receiptPayment.status }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Amount -->
+        <div class="receipt-amount-section">
+          <span class="receipt-amount-label">Amount Paid</span>
+          <span class="receipt-amount" [class]="receiptPayment.status === 'REFUNDED' ? 'refunded' : ''">
+            {{ receiptPayment.status === 'REFUNDED' ? '- ' : '' }}₹{{ receiptPayment.amount.toFixed(2) }}
+          </span>
+        </div>
+
+        @if (receiptLoading) {
+          <div class="receipt-loading">
+            <div class="receipt-spinner"></div>
+            <span>Loading booking details...</span>
+          </div>
+        } @else {
+          <!-- Payment Details -->
+          <div class="receipt-section">
+            <h4 class="receipt-section-title">Payment Details</h4>
+            <div class="receipt-row">
+              <span>Payment Method</span><span>{{ receiptPayment.paymentMethod }}</span>
+            </div>
+            <div class="receipt-row">
+              <span>Transaction ID</span><span class="font-mono text-xs">{{ receiptPayment.transactionId }}</span>
+            </div>
+            <div class="receipt-row">
+              <span>Date & Time</span><span>{{ formatDate(receiptPayment.paidAt) }}</span>
+            </div>
+          </div>
+
+          <!-- Booking Details -->
+          @if (receiptBooking) {
+            <div class="receipt-section">
+              <h4 class="receipt-section-title">Booking Details</h4>
+              <div class="receipt-row">
+                <span>Parking Lot</span><span>{{ receiptBooking.lotName }}</span>
+              </div>
+              <div class="receipt-row">
+                <span>Spot</span><span>{{ receiptBooking.spotNumber }}</span>
+              </div>
+              <div class="receipt-row">
+                <span>Vehicle</span><span class="font-mono">{{ receiptBooking.vehiclePlate }}</span>
+              </div>
+              <div class="receipt-row">
+                <span>Check-in</span><span>{{ formatDate(receiptBooking.scheduledStartTime) }}</span>
+              </div>
+              <div class="receipt-row">
+                <span>Check-out</span><span>{{ formatDate(receiptBooking.scheduledEndTime) }}</span>
+              </div>
+              <div class="receipt-row highlight">
+                <span>Duration</span><span>{{ getDuration() }}</span>
+              </div>
+              @if (receiptBooking.pricePerHour) {
+                <div class="receipt-row">
+                  <span>Rate</span><span>₹{{ receiptBooking.pricePerHour.toFixed(2) }}/hr</span>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Description -->
+          <div class="receipt-section">
+            <div class="receipt-row">
+              <span>Description</span><span>{{ receiptPayment.description || 'Parking fee' }}</span>
+            </div>
+          </div>
+        }
+
+        <!-- Footer -->
+        <div class="receipt-footer">
+          <p>This is a computer-generated receipt</p>
+          <div class="receipt-actions">
+            <button class="receipt-email-btn" [class.email-error]="emailError" (click)="emailReceipt()" [disabled]="emailSending || emailSent">
+              @if (emailSending) {
+                <div class="btn-spinner"></div>
+                Sending...
+              } @else if (emailSent) {
+                <span class="material-icons-round" style="font-size:16px">check</span>
+                Sent!
+              } @else if (emailError) {
+                <span class="material-icons-round" style="font-size:16px">error_outline</span>
+                {{ emailError }}
+              } @else {
+                <span class="material-icons-round" style="font-size:16px">mail</span>
+                Email Receipt
+              }
+            </button>
+            <button class="receipt-download-btn" (click)="downloadReceipt()">
+              <span class="material-icons-round" style="font-size:16px">download</span>
+              Download PDF
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
 </div>

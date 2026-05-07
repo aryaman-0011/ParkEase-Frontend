@@ -69,9 +69,36 @@ export class AuthService {
     );
   }
 
+  /** Upload profile picture */
+  uploadProfilePicture(file: File): Observable<UserResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<UserResponse>(`${this.apiUrl}/profile/picture`, formData).pipe(
+      tap((user) => {
+        localStorage.setItem('user', JSON.stringify(user));
+        this.currentUserSubject.next(user);
+      })
+    );
+  }
+
+  /** Remove profile picture */
+  removeProfilePicture(): Observable<UserResponse> {
+    return this.http.delete<UserResponse>(`${this.apiUrl}/profile/picture`).pipe(
+      tap((user) => {
+        localStorage.setItem('user', JSON.stringify(user));
+        this.currentUserSubject.next(user);
+      })
+    );
+  }
+
   /** Change password (only for LOCAL provider accounts) */
   changePassword(request: ChangePasswordRequest): Observable<ApiMessageResponse> {
     return this.http.put<ApiMessageResponse>(`${this.apiUrl}/password`, request);
+  }
+
+  /** Send receipt email to user */
+  sendReceiptEmail(details: Record<string, string>): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/receipt/email`, details);
   }
 
   /** Deactivate the user account */

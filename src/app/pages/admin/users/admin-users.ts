@@ -4,10 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { AdminService } from '../../../services/admin.service';
+import { LotService } from '../../../services/lot.service';
 import {
   AdminUserResponse,
   UserStatsResponse,
 } from '../../../models/admin.model';
+import { LotResponse } from '../../../models/lot.model';
 import { NavbarComponent } from '../../../components/navbar/navbar';
 
 @Component({
@@ -31,6 +33,15 @@ export class AdminUsersComponent implements OnInit {
   success = '';
   actionLoading: Record<number, boolean> = {};
 
+  // Sorting
+  sortField: 'id' | 'name' | 'role' | 'date' = 'id';
+  sortDir: 'asc' | 'desc' = 'desc';
+
+  // City filter for managers
+  cityFilter = '';
+  allCities: string[] = [];
+  managerCities: Map<number, string[]> = new Map();
+
   // Delete confirmation
   deleteTarget: AdminUserResponse | null = null;
   confirmDeleteName = '';
@@ -39,9 +50,19 @@ export class AdminUsersComponent implements OnInit {
   roleTarget: AdminUserResponse | null = null;
   newRole: 'DRIVER' | 'MANAGER' | 'ADMIN' = 'DRIVER';
 
+  // Broadcast
+  showBroadcast = false;
+  broadcastTitle = '';
+  broadcastMessage = '';
+  broadcastAudience: 'DRIVER' | 'MANAGER' | 'ALL' = 'ALL';
+  broadcastLoading = false;
+  broadcastSuccess = '';
+  broadcastError = '';
+
   constructor(
     private adminService: AdminService,
     private authService: AuthService,
+    private lotService: LotService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
@@ -49,12 +70,34 @@ export class AdminUsersComponent implements OnInit {
   ngOnInit(): void {
     this.loadStats();
     this.loadUsers();
+    this.loadLotCities();
   }
 
   loadStats(): void {
     this.adminService.getStats().subscribe({
       next: (stats) => {
         this.stats = stats;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  loadLotCities(): void {
+    this.lotService.getAllLots().subscribe({
+      next: (lots: LotResponse[]) => {
+        this.managerCities.clear();
+        const citySet = new Set<string>();
+        lots.forEach(lot => {
+          if (lot.city) {
+            citySet.add(lot.city);
+            const existing = this.managerCities.get(lot.managerId) || [];
+            if (!existing.includes(lot.city)) {
+              existing.push(lot.city);
+              this.managerCities.set(lot.managerId, existing);
+            }
+          }
+        });
+        this.allCities = [...citySet].sort();
         this.cdr.detectChanges();
       },
     });
@@ -89,6 +132,53 @@ export class AdminUsersComponent implements OnInit {
   onFilterChange(): void {
     this.page = 0;
     this.loadUsers();
+  }
+
+  toggleSort(field: 'id' | 'name' | 'role' | 'date'): void {
+    if (this.sortField === field) {
+      this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortField = field;
+      this.sortDir = field === 'name' ? 'asc' : 'desc';
+    }
+  }
+
+  get sortedUsers(): AdminUserResponse[] {
+    let filtered = [...this.users];
+
+    // Apply city filter — only relevant for managers
+    if (this.cityFilter) {
+      const cityLower = this.cityFilter.toLowerCase();
+      const managerIdsInCity = new Set<number>();
+      this.managerCities.forEach((cities, managerId) => {
+        if (cities.some(c => c.toLowerCase().includes(cityLower))) {
+          managerIdsInCity.add(managerId);
+        }
+      });
+      filtered = filtered.filter(u => u.role === 'MANAGER' && managerIdsInCity.has(u.id));
+    }
+
+    const dir = this.sortDir === 'asc' ? 1 : -1;
+    filtered.sort((a, b) => {
+      switch (this.sortField) {
+        case 'id': return (a.id - b.id) * dir;
+        case 'name': return a.fullName.localeCompare(b.fullName) * dir;
+        case 'role': return a.role.localeCompare(b.role) * dir;
+        case 'date': return (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) * dir;
+        default: return 0;
+      }
+    });
+    return filtered;
+  }
+
+  getManagerCities(managerId: number): string {
+    const cities = this.managerCities.get(managerId);
+    return cities?.join(', ') || '—';
+  }
+
+  getSortIcon(field: string): string {
+    if (this.sortField !== field) return 'unfold_more';
+    return this.sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward';
   }
 
   prevPage(): void {
@@ -249,5 +339,73 @@ export class AdminUsersComponent implements OnInit {
   private clearMessages(): void {
     this.error = '';
     this.success = '';
+  }
+
+  // ── Broadcast ──
+
+  openBroadcastModal(): void {
+    this.showBroadcast = true;
+    this.broadcastTitle = '';
+    this.broadcastMessage = '';
+    this.broadcastAudience = 'ALL';
+    this.broadcastSuccess = '';
+    this.broadcastError = '';
+  }
+
+  closeBroadcastModal(): void {
+    this.showBroadcast = false;
+  }
+
+  sendBroadcast(): void {
+    if (!this.broadcastTitle.trim() || !this.broadcastMessage.trim()) {
+      this.broadcastError = 'Title and message are required.';
+      return;
+    }
+    this.broadcastLoading = true;
+    this.broadcastError = '';
+    this.broadcastSuccess = '';
+
+    const roles: string[] = this.broadcastAudience === 'ALL'
+      ? ['DRIVER', 'MANAGER']
+      : [this.broadcastAudience];
+
+    // Collect user IDs from all target roles
+    const idRequests = roles.map(r => this.adminService.getUserIdsByRole(r));
+
+    import('rxjs').then(({ forkJoin }) => {
+      forkJoin(idRequests).subscribe({
+        next: (results) => {
+          const allIds = results.flatMap(r => r.ids);
+          if (allIds.length === 0) {
+            this.broadcastError = 'No users found for the selected audience.';
+            this.broadcastLoading = false;
+            this.cdr.detectChanges();
+            return;
+          }
+          this.adminService.broadcastMessage(allIds, this.broadcastTitle.trim(), this.broadcastMessage.trim()).subscribe({
+            next: (res) => {
+              this.broadcastSuccess = `Broadcast sent to ${res.recipientCount} users!`;
+              this.broadcastLoading = false;
+              this.cdr.detectChanges();
+              setTimeout(() => {
+                this.showBroadcast = false;
+                this.success = `📢 Broadcast sent to ${res.recipientCount} users!`;
+                this.cdr.detectChanges();
+              }, 1500);
+            },
+            error: () => {
+              this.broadcastError = 'Failed to send broadcast. Try again.';
+              this.broadcastLoading = false;
+              this.cdr.detectChanges();
+            },
+          });
+        },
+        error: () => {
+          this.broadcastError = 'Failed to fetch users. Try again.';
+          this.broadcastLoading = false;
+          this.cdr.detectChanges();
+        },
+      });
+    });
   }
 }

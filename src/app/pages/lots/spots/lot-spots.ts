@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SpotService } from '../../../services/spot.service';
 import { LotService } from '../../../services/lot.service';
 import { BookingService } from '../../../services/booking.service';
@@ -66,6 +66,10 @@ export class LotSpotsComponent implements OnInit {
   // Payment receipt
   lastReceipt: PaymentResponse | null = null;
 
+  // Auth modal for guests
+  showAuthModal = false;
+  pendingGuestSpot: SpotResponse | null = null;
+
   spotTypes: SpotType[] = ['COMPACT', 'STANDARD', 'LARGE', 'MOTORBIKE', 'EV'];
 
   constructor(
@@ -76,8 +80,9 @@ export class LotSpotsComponent implements OnInit {
     private paymentService: PaymentService,
     private vehicleService: VehicleService,
     private route: ActivatedRoute,
+    private router: Router,
     private cdr: ChangeDetectorRef,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.lotId = Number(this.route.snapshot.paramMap.get('lotId'));
@@ -164,9 +169,37 @@ export class LotSpotsComponent implements OnInit {
   // ── STEP 1: Click Book → Payment Modal ──
   bookSpot(spot: SpotResponse): void {
     const user = this.authService.getCurrentUser();
-    if (!user) { this.showError('You must be logged in.'); return; }
+    // Guest: show auth modal
+    if (!user) {
+      this.pendingGuestSpot = spot;
+      this.showAuthModal = true;
+      this.cdr.detectChanges();
+      return;
+    }
+    // Check if driver has a compatible vehicle
+    const compatible = this.vehicles.filter(v => v.isActive && this.isVehicleCompatible(v, spot));
+    if (this.vehicles.length > 0 && compatible.length === 0) {
+      this.showError(`This spot requires a ${this.getTypeLabel(spot.vehicleType)} vehicle. You don't have a matching vehicle registered.`);
+      return;
+    }
     this.pendingSpot = spot;
     this.showPaymentModal = true;
+    this.cdr.detectChanges();
+  }
+
+  goToLogin(): void {
+    const returnUrl = `/lots/${this.lotId}/spots`;
+    this.router.navigate(['/login'], { queryParams: { returnUrl } });
+  }
+
+  goToSignup(): void {
+    const returnUrl = `/lots/${this.lotId}/spots`;
+    this.router.navigate(['/signup'], { queryParams: { returnUrl } });
+  }
+
+  dismissAuthModal(): void {
+    this.showAuthModal = false;
+    this.pendingGuestSpot = null;
     this.cdr.detectChanges();
   }
 
@@ -188,7 +221,7 @@ export class LotSpotsComponent implements OnInit {
     this.bookForm.startTime = this.toTimeStr(now);
     this.bookForm.endDate = this.toDateStr(end);
     this.bookForm.endTime = this.toTimeStr(end);
-    this.bookForm.vehicleId = this.vehicles.length > 0 ? this.vehicles[0].vehicleId : null;
+    this.bookForm.vehicleId = this.compatibleVehicles.length > 0 ? this.compatibleVehicles[0].vehicleId : null;
     this.cdr.detectChanges();
   }
 
@@ -212,6 +245,20 @@ export class LotSpotsComponent implements OnInit {
 
   get selectedVehicle(): VehicleResponse | undefined {
     return this.vehicles.find(v => v.vehicleId === this.bookForm.vehicleId);
+  }
+
+  get compatibleVehicles(): VehicleResponse[] {
+    if (!this.pendingSpot) return this.vehicles.filter(v => v.isActive);
+    return this.vehicles.filter(v => v.isActive && this.isVehicleCompatible(v, this.pendingSpot!));
+  }
+
+  isVehicleCompatible(vehicle: VehicleResponse, spot: SpotResponse): boolean {
+    const map: Record<string, string> = {
+      'TWO_WHEELER': '2W',
+      'FOUR_WHEELER': '4W',
+      'HEAVY': 'HEAVY',
+    };
+    return vehicle.vehicleType === (map[spot.vehicleType] || spot.vehicleType);
   }
 
   // ── STEP 3: Submit Booking ──
@@ -431,12 +478,23 @@ export class LotSpotsComponent implements OnInit {
 
   getSpotTypeIcon(type: string): string {
     switch (type) {
-      case 'COMPACT': return '🚗';
-      case 'STANDARD': return '🚙';
-      case 'LARGE': return '🚐';
-      case 'MOTORBIKE': return '🏍️';
-      case 'EV': return '⚡';
-      default: return '🅿️';
+      case 'COMPACT': return 'local_taxi';
+      case 'STANDARD': return 'directions_car';
+      case 'LARGE': return 'local_shipping';
+      case 'MOTORBIKE': return 'two_wheeler';
+      case 'EV': return 'electric_car';
+      default: return 'local_parking';
+    }
+  }
+
+  getSpotTypeColor(type: string): string {
+    switch (type) {
+      case 'COMPACT': return '#60a5fa';
+      case 'STANDARD': return '#a78bfa';
+      case 'LARGE': return '#fbbf24';
+      case 'MOTORBIKE': return '#f472b6';
+      case 'EV': return '#34d399';
+      default: return '#94a3b8';
     }
   }
 
@@ -446,6 +504,24 @@ export class LotSpotsComponent implements OnInit {
       case 'FOUR_WHEELER': return '4-Wheeler';
       case 'HEAVY': return 'Heavy';
       default: return type;
+    }
+  }
+
+  getVehicleTypeIcon(type: string): string {
+    switch (type) {
+      case 'TWO_WHEELER': return 'two_wheeler';
+      case 'FOUR_WHEELER': return 'directions_car';
+      case 'HEAVY': return 'local_shipping';
+      default: return 'directions_car';
+    }
+  }
+
+  getVehicleTypeColor(type: string): string {
+    switch (type) {
+      case 'TWO_WHEELER': return '#f472b6';
+      case 'FOUR_WHEELER': return '#a78bfa';
+      case 'HEAVY': return '#fbbf24';
+      default: return '#94a3b8';
     }
   }
 

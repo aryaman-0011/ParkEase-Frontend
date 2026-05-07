@@ -46,12 +46,12 @@
   margin-top: auto;
 }
 
-.danger-grid > .card {
+.danger-grid>.card {
   display: flex;
   flex-direction: column;
 }
 
-.danger-grid > .card > .card-body {
+.danger-grid>.card>.card-body {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -79,6 +79,103 @@
   padding: 28px;
 }
 
+/* ───── Avatar Section ───── */
+.avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px 28px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.avatar-wrapper {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s;
+}
+.avatar-wrapper:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.avatar-initials {
+  font-size: 26px;
+  font-weight: 700;
+  color: #888;
+  user-select: none;
+}
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.avatar-wrapper:hover .avatar-overlay {
+  opacity: 1;
+}
+.avatar-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.avatar-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e5e5e5;
+}
+.avatar-hint {
+  font-size: 12px;
+  color: #666;
+}
+.avatar-remove-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  margin-top: 4px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 6px;
+  background: rgba(239, 68, 68, 0.06);
+  color: #f87171;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  width: fit-content;
+}
+.avatar-remove-btn:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+.avatar-remove-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.avatar-error {
+  font-size: 12px;
+  color: #f87171;
+  margin-top: 2px;
+}
+.hidden {
+  display: none !important;
+}
 /* ───── Tabs ───── */
 .tab-btn {
   flex: 1;
@@ -405,8 +502,13 @@
 
 /* ───── Animations ───── */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
@@ -414,6 +516,7 @@
     opacity: 0;
     transform: translateY(16px) scale(0.96);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -421,10 +524,180 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.15);
   }
+
   50% {
     box-shadow: 0 0 16px 4px rgba(239, 68, 68, 0.1);
   }
+}
+
+/* ═══════ LIGHT THEME ═══════ */
+:host-context([data-theme="light"]) .card {
+  background: #f5ece0;
+  border: 1px solid rgba(60, 45, 25, 0.18);
+  box-shadow: 0 4px 16px rgba(60, 45, 25, 0.08);
+}
+
+:host-context([data-theme="light"]) .card:hover {
+  border-color: rgba(60, 45, 25, 0.28);
+  box-shadow: 0 8px 32px rgba(60, 45, 25, 0.12);
+}
+
+:host-context([data-theme="light"]) .card-header {
+  border-color: rgba(60, 45, 25, 0.1);
+}
+
+:host-context([data-theme="light"]) .tab-active {
+  background: #3b2e1e !important;
+  color: #f5ece0 !important;
+}
+
+:host-context([data-theme="light"]) .tab-inactive {
+  color: #5a4a35;
+}
+
+:host-context([data-theme="light"]) .tab-inactive:hover:not(:disabled) {
+  color: #3b2e1e;
+  background: rgba(60, 45, 25, 0.08);
+}
+
+:host-context([data-theme="light"]) .tab-inactive:disabled {
+  color: #b5a48e;
+}
+
+:host-context([data-theme="light"]) .tab-danger {
+  background: #7f1d1d !important;
+  color: #fecaca !important;
+}
+
+:host-context([data-theme="light"]) .label {
+  color: #8f7e67;
+}
+
+:host-context([data-theme="light"]) .input {
+  background: #dfd3c4;
+  border-color: rgba(60, 45, 25, 0.1);
+  color: #3b2e1e;
+}
+
+:host-context([data-theme="light"]) .input:focus {
+  background: #efe5d8;
+  border-color: rgba(60, 45, 25, 0.25);
+}
+
+:host-context([data-theme="light"]) .input::placeholder {
+  color: #a19178;
+}
+
+:host-context([data-theme="light"]) .btn-primary {
+  background: #3b2e1e;
+  color: #efe5d8;
+}
+
+:host-context([data-theme="light"]) .btn-primary:hover:not(:disabled) {
+  background: #4d3d2a;
+}
+
+:host-context([data-theme="light"]) .eye-btn {
+  color: #a19178;
+}
+
+:host-context([data-theme="light"]) .eye-btn:hover {
+  color: #6b5a45;
+}
+
+:host-context([data-theme="light"]) .danger-card {
+  background: #f5ece0;
+  border-color: rgba(180, 100, 20, 0.25);
+  box-shadow: 0 4px 16px rgba(180, 100, 20, 0.06);
+}
+
+:host-context([data-theme="light"]) .danger-card:hover {
+  border-color: rgba(180, 100, 20, 0.4);
+  box-shadow: 0 8px 32px rgba(180, 100, 20, 0.1);
+}
+
+:host-context([data-theme="light"]) .delete-card {
+  background: #f5ece0;
+  border-color: rgba(180, 40, 40, 0.25);
+  box-shadow: 0 4px 16px rgba(180, 40, 40, 0.06);
+}
+
+:host-context([data-theme="light"]) .delete-card:hover {
+  border-color: rgba(180, 40, 40, 0.4);
+  box-shadow: 0 8px 32px rgba(180, 40, 40, 0.1);
+}
+
+:host-context([data-theme="light"]) .btn-danger {
+  background: #92400e !important;
+  color: #fef3c7 !important;
+  border-color: #92400e !important;
+}
+
+:host-context([data-theme="light"]) .btn-danger:hover:not(:disabled) {
+  background: #78350f !important;
+}
+
+:host-context([data-theme="light"]) .btn-danger:disabled {
+  opacity: 0.55;
+}
+
+:host-context([data-theme="light"]) .btn-delete {
+  background: #7f1d1d !important;
+  color: #fecaca !important;
+  border-color: #7f1d1d !important;
+}
+
+:host-context([data-theme="light"]) .btn-delete:hover:not(:disabled) {
+  background: #691b1b !important;
+}
+
+:host-context([data-theme="light"]) .btn-delete:disabled {
+  opacity: 0.55;
+}
+
+:host-context([data-theme="light"]) .modal-overlay {
+  background: rgba(50, 38, 22, 0.25);
+}
+
+:host-context([data-theme="light"]) .modal-content {
+  background: #efe5d8;
+  border-color: rgba(60, 45, 25, 0.1);
+  box-shadow: 0 24px 64px rgba(60, 45, 25, 0.1);
+}
+
+:host-context([data-theme="light"]) .btn-cancel {
+  background: #dfd3c4;
+  border-color: rgba(60, 45, 25, 0.08);
+  color: #7d6c55;
+}
+
+:host-context([data-theme="light"]) .btn-cancel:hover {
+  background: #d5c8b8;
+  color: #3b2e1e;
+}
+
+/* ───── Avatar Light Theme ───── */
+:host-context([data-theme="light"]) .avatar-section {
+  border-bottom-color: rgba(60, 45, 25, 0.08);
+}
+:host-context([data-theme="light"]) .avatar-wrapper {
+  background: rgba(139, 94, 60, 0.08);
+  border-color: rgba(139, 94, 60, 0.2);
+}
+:host-context([data-theme="light"]) .avatar-wrapper:hover {
+  border-color: rgba(139, 94, 60, 0.4);
+}
+:host-context([data-theme="light"]) .avatar-initials {
+  color: #8B5E3C;
+}
+:host-context([data-theme="light"]) .avatar-name {
+  color: #3b2e1e;
+}
+:host-context([data-theme="light"]) .avatar-hint {
+  color: #a19178;
 }

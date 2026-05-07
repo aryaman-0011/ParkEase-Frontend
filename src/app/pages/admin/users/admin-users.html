@@ -52,7 +52,7 @@
       </div>
     }
 
-    <!-- Search & Filter Bar -->
+    <!-- Search, Filter & Sort Bar -->
     <div class="flex flex-col sm:flex-row gap-3 mb-6">
       <div class="relative flex-1">
         <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
@@ -74,11 +74,50 @@
         <option value="MANAGER">Manager</option>
         <option value="ADMIN">Admin</option>
       </select>
+      <div class="relative">
+        <span class="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" style="font-size:16px">location_on</span>
+        <input
+          type="text"
+          [(ngModel)]="cityFilter"
+          placeholder="Filter by city..."
+          list="cityList"
+          class="bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 py-3 text-neutral-300 focus:outline-none focus:border-white/25 transition-all text-sm min-w-[160px]"
+        />
+        <datalist id="cityList">
+          @for (city of allCities; track city) {
+            <option [value]="city"></option>
+          }
+        </datalist>
+      </div>
+      <select
+        [(ngModel)]="sortField"
+        class="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-neutral-300 focus:outline-none focus:border-white/25 transition-all text-sm min-w-[140px] appearance-none cursor-pointer"
+      >
+        <option value="id">Sort by ID</option>
+        <option value="name">Sort by Name</option>
+        <option value="role">Sort by Role</option>
+        <option value="date">Sort by Joined</option>
+      </select>
+      <button
+        (click)="sortDir = sortDir === 'asc' ? 'desc' : 'asc'"
+        class="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-neutral-300 hover:bg-white/10 transition-all text-sm flex items-center gap-1.5 min-w-[80px] justify-center"
+        title="Toggle sort direction"
+      >
+        <span class="material-icons-round" style="font-size:16px">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+        {{ sortDir === 'asc' ? 'A→Z' : 'Z→A' }}
+      </button>
       <button
         (click)="onSearch()"
         class="bg-white/10 border border-white/10 rounded-xl px-5 py-3 text-white text-sm font-medium hover:bg-white/15 transition-all"
       >
         Search
+      </button>
+      <button
+        (click)="openBroadcastModal()"
+        class="bg-purple-500/10 border border-purple-500/20 rounded-xl px-5 py-3 text-purple-400 text-sm font-medium hover:bg-purple-500/20 transition-all flex items-center gap-2"
+      >
+        <span class="material-icons-round" style="font-size:16px">campaign</span>
+        Broadcast
       </button>
     </div>
 
@@ -99,16 +138,25 @@
           <table class="w-full">
             <thead>
               <tr class="border-b border-white/5">
-                <th class="text-left text-xs text-neutral-500 font-medium uppercase tracking-wider px-6 py-4">User</th>
-                <th class="text-left text-xs text-neutral-500 font-medium uppercase tracking-wider px-4 py-4">Role</th>
+                <th class="text-left text-xs text-neutral-500 font-medium uppercase tracking-wider px-6 py-4 cursor-pointer hover:text-neutral-300 transition-colors" (click)="toggleSort('name')">
+                  <span class="flex items-center gap-1">User <span class="material-icons-round" style="font-size:14px">{{ getSortIcon('name') }}</span></span>
+                </th>
+                <th class="text-left text-xs text-neutral-500 font-medium uppercase tracking-wider px-4 py-4 cursor-pointer hover:text-neutral-300 transition-colors" (click)="toggleSort('role')">
+                  <span class="flex items-center gap-1">Role <span class="material-icons-round" style="font-size:14px">{{ getSortIcon('role') }}</span></span>
+                </th>
                 <th class="text-left text-xs text-neutral-500 font-medium uppercase tracking-wider px-4 py-4">Provider</th>
                 <th class="text-left text-xs text-neutral-500 font-medium uppercase tracking-wider px-4 py-4">Status</th>
-                <th class="text-left text-xs text-neutral-500 font-medium uppercase tracking-wider px-4 py-4">Joined</th>
+                <th class="text-left text-xs text-neutral-500 font-medium uppercase tracking-wider px-4 py-4 cursor-pointer hover:text-neutral-300 transition-colors" (click)="toggleSort('date')">
+                  <span class="flex items-center gap-1">Joined <span class="material-icons-round" style="font-size:14px">{{ getSortIcon('date') }}</span></span>
+                </th>
+                <th class="text-left text-xs text-neutral-500 font-medium uppercase tracking-wider px-4 py-4 cursor-pointer hover:text-neutral-300 transition-colors" (click)="toggleSort('id')">
+                  <span class="flex items-center gap-1">ID <span class="material-icons-round" style="font-size:14px">{{ getSortIcon('id') }}</span></span>
+                </th>
                 <th class="text-right text-xs text-neutral-500 font-medium uppercase tracking-wider px-6 py-4">Actions</th>
               </tr>
             </thead>
             <tbody>
-              @for (user of users; track user.id) {
+              @for (user of sortedUsers; track user.id) {
                 <tr class="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
                   <!-- User info -->
                   <td class="px-6 py-4">
@@ -117,6 +165,12 @@
                       <div>
                         <div class="text-sm font-medium text-white">{{ user.fullName }}</div>
                         <div class="text-xs text-neutral-500">{{ user.email }}</div>
+                        @if (user.role === 'MANAGER' && managerCities.has(user.id)) {
+                          <div class="flex items-center gap-1 mt-1">
+                            <span class="material-icons-round text-amber-400" style="font-size:12px">location_on</span>
+                            <span class="text-[10px] text-amber-400/70">{{ getManagerCities(user.id) }}</span>
+                          </div>
+                        }
                       </div>
                     </div>
                   </td>
@@ -135,6 +189,10 @@
                   <!-- Joined -->
                   <td class="px-4 py-4">
                     <span class="text-sm text-neutral-500">{{ user.createdAt | date: 'MMM d, y' }}</span>
+                  </td>
+                  <!-- ID -->
+                  <td class="px-4 py-4">
+                    <span class="text-xs text-neutral-600 font-mono">#{{ user.id }}</span>
                   </td>
                   <!-- Actions -->
                   <td class="px-6 py-4 text-right">
@@ -173,7 +231,7 @@
 
         <!-- Mobile Cards -->
         <div class="md:hidden divide-y divide-white/[0.03]">
-          @for (user of users; track user.id) {
+          @for (user of sortedUsers; track user.id) {
             <div class="p-5 hover:bg-white/[0.02] transition-colors">
               <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-3">
@@ -185,6 +243,12 @@
                 </div>
                 <span class="badge" [class]="getStatusBadgeClass(user.active)">{{ user.active ? 'Active' : 'Suspended' }}</span>
               </div>
+              @if (user.role === 'MANAGER' && managerCities.has(user.id)) {
+                <div class="flex items-center gap-1 mb-2">
+                  <span class="material-icons-round text-amber-400" style="font-size:12px">location_on</span>
+                  <span class="text-[11px] text-amber-400/70">{{ getManagerCities(user.id) }}</span>
+                </div>
+              }
               <div class="flex items-center gap-2 mb-3">
                 <span class="badge" [class]="getRoleBadgeClass(user.role)">{{ user.role }}</span>
                 <span class="text-xs text-neutral-600">{{ user.provider }}</span>
@@ -302,6 +366,102 @@
             class="modal-btn-danger"
           >
             Delete Permanently
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ═══ Broadcast Modal ═══ -->
+  @if (showBroadcast) {
+    <div class="modal-overlay" (click)="closeBroadcastModal()">
+      <div class="modal-card" style="max-width:480px" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
+              <span class="material-icons-round text-purple-400" style="font-size:20px">campaign</span>
+            </div>
+            <div>
+              <p class="text-lg font-bold text-white">Broadcast Message</p>
+              <p class="text-xs text-neutral-500">Send a notification to users</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-body">
+          @if (broadcastError) {
+            <div class="mb-4 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2 text-red-400 text-xs">{{ broadcastError }}</div>
+          }
+          @if (broadcastSuccess) {
+            <div class="mb-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2 text-emerald-400 text-xs">{{ broadcastSuccess }}</div>
+          }
+
+          <!-- Audience selector -->
+          <p class="text-xs text-neutral-500 font-medium uppercase tracking-wider mb-2">Audience</p>
+          <div class="grid grid-cols-3 gap-2 mb-5">
+            <button
+              (click)="broadcastAudience = 'DRIVER'"
+              [class]="broadcastAudience === 'DRIVER' ? 'role-option-active' : 'role-option'"
+              class="text-center text-sm py-2.5"
+            >
+              <span class="material-icons-round block mb-1" style="font-size:18px">directions_car</span>
+              Drivers
+            </button>
+            <button
+              (click)="broadcastAudience = 'MANAGER'"
+              [class]="broadcastAudience === 'MANAGER' ? 'role-option-active' : 'role-option'"
+              class="text-center text-sm py-2.5"
+            >
+              <span class="material-icons-round block mb-1" style="font-size:18px">domain</span>
+              Managers
+            </button>
+            <button
+              (click)="broadcastAudience = 'ALL'"
+              [class]="broadcastAudience === 'ALL' ? 'role-option-active' : 'role-option'"
+              class="text-center text-sm py-2.5"
+            >
+              <span class="material-icons-round block mb-1" style="font-size:18px">groups</span>
+              Everyone
+            </button>
+          </div>
+
+          <!-- Title -->
+          <p class="text-xs text-neutral-500 font-medium uppercase tracking-wider mb-2">Title</p>
+          <input
+            type="text"
+            [(ngModel)]="broadcastTitle"
+            placeholder="e.g. Scheduled Maintenance"
+            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-neutral-600 focus:outline-none focus:border-white/25 transition-all text-sm mb-4"
+            maxlength="100"
+          />
+
+          <!-- Message -->
+          <p class="text-xs text-neutral-500 font-medium uppercase tracking-wider mb-2">Message</p>
+          <textarea
+            [(ngModel)]="broadcastMessage"
+            placeholder="Write your broadcast message..."
+            rows="4"
+            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-neutral-600 focus:outline-none focus:border-white/25 transition-all text-sm resize-none"
+            maxlength="500"
+          ></textarea>
+          <p class="text-right text-[10px] text-neutral-600 mt-1">{{ broadcastMessage.length }}/500</p>
+        </div>
+
+        <div class="modal-footer">
+          <button (click)="closeBroadcastModal()" class="modal-btn-cancel">Cancel</button>
+          <button
+            (click)="sendBroadcast()"
+            [disabled]="broadcastLoading || !broadcastTitle.trim() || !broadcastMessage.trim()"
+            class="modal-btn-confirm flex items-center gap-2"
+            style="background: linear-gradient(135deg, #a855f7, #7c3aed); color: #fff; border: none;"
+          >
+            @if (broadcastLoading) {
+              <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              Sending...
+            } @else {
+              <span class="material-icons-round" style="font-size:16px">send</span>
+              Send Broadcast
+            }
           </button>
         </div>
       </div>

@@ -73,4 +73,18 @@ export class AdminService {
   getStats(): Observable<UserStatsResponse> {
     return this.http.get<UserStatsResponse>(`${this.apiUrl}/stats`);
   }
+
+  getUserIdsByRole(role: string): Observable<{ ids: number[] }> {
+    return this.http.get<{ ids: number[] }>(
+      `${environment.apiUrl}/auth/internal/user-ids-by-role`,
+      { params: { role } }
+    );
+  }
+
+  broadcastMessage(recipientIds: number[], title: string, message: string): Observable<{ message: string; recipientCount: number }> {
+    return this.http.post<{ message: string; recipientCount: number }>(
+      `${environment.apiUrl}/notifications/broadcast`,
+      { recipientIds, title, message }
+    );
+  }
 }

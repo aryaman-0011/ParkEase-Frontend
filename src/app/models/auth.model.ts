@@ -11,6 +11,8 @@ export interface RegisterRequest {
   phone?: string;
   role: 'DRIVER' | 'MANAGER' | 'ADMIN';
   vehiclePlate?: string;
+  businessName?: string;
+  businessRegistration?: string;
 }
 
 export interface ForgotPasswordRequest {
@@ -50,6 +52,8 @@ export interface UserResponse {
   provider: string;
   active: boolean;
   profilePicUrl: string | null;
+  businessName: string | null;
+  businessRegistration: string | null;
   createdAt: string;
 }
 

@@ -1,0 +1,92 @@
+<app-navbar></app-navbar>
+<div class="notifications-page">
+  <!-- Header -->
+  <div class="notif-page-header">
+    <div class="notif-page-title-row">
+      <h1>
+        <span class="material-icons-round notif-title-icon" style="color:#a78bfa;font-size:22px;vertical-align:middle">notifications</span>
+        Notifications
+      </h1>
+      @if (unreadCount > 0) {
+        <span class="notif-unread-badge">{{ unreadCount }} unread</span>
+      }
+    </div>
+    @if (notifications.length > 0) {
+      <button class="notif-mark-all-btn" (click)="markAllRead()">
+        <span class="material-icons-round" style="font-size:14px;vertical-align:middle">done_all</span>
+        Mark all as read
+      </button>
+    }
+  </div>
+
+  <!-- Category tabs -->
+  <div class="notif-categories">
+    @for (cat of categories; track cat.key) {
+      <button
+        class="notif-cat-tab"
+        [class.notif-cat-active]="activeCategory === cat.key"
+        (click)="setCategory(cat.key)"
+      >
+        <span class="notif-cat-icon material-icons-round" style="font-size:16px">{{ getCatIconName(cat.icon) }}</span>
+        <span class="notif-cat-label">{{ cat.label }}</span>
+        @if (getCategoryCount(cat) > 0) {
+          <span class="notif-cat-count">{{ getCategoryCount(cat) }}</span>
+        }
+      </button>
+    }
+  </div>
+
+  <!-- Content -->
+  @if (loading) {
+    <div class="notif-state">
+      <div class="notif-spinner"></div>
+      <p>Loading notifications...</p>
+    </div>
+  } @else if (errorMsg) {
+    <div class="notif-state">
+      <span class="material-icons-round notif-state-svg" style="font-size:48px;color:#f87171">error_outline</span>
+      <h3>Something went wrong</h3>
+      <p>{{ errorMsg }}</p>
+      <button class="notif-retry-btn" (click)="loadNotifications()">Retry</button>
+    </div>
+  } @else if (displayedNotifications.length === 0) {
+    <div class="notif-state">
+      <span class="material-icons-round notif-state-svg" style="font-size:48px;color:#555">notifications_off</span>
+      <h3>No notifications</h3>
+      <p>{{ activeCategory === 'all' ? "You're all caught up!" : 'No notifications in this category' }}</p>
+    </div>
+  } @else {
+    <div class="notif-list">
+      @for (n of displayedNotifications; track n.id) {
+        <div class="notif-card" [class.notif-card-unread]="!n.read" (click)="markAsRead(n)">
+          <div class="notif-card-left">
+            <div class="notif-card-icon"><span class="material-icons-round" [style.color]="getIconColor(n.type)" style="font-size:22px">{{ getIconName(n.type) }}</span></div>
+            @if (!n.read) {
+              <div class="notif-card-dot"></div>
+            }
+          </div>
+          <div class="notif-card-body">
+            <div class="notif-card-top">
+              <span class="notif-card-title">{{ n.title }}</span>
+              <span class="notif-card-time">{{ getTimeAgo(n.sentAt) }}</span>
+            </div>
+            <p class="notif-card-msg">{{ n.message }}</p>
+            <div class="notif-card-footer">
+              <span class="notif-card-type">{{ formatType(n.type) }}</span>
+              <div class="notif-card-actions">
+                @if (!n.read) {
+                  <button class="notif-action-btn" (click)="markAsRead(n)" title="Mark as read">
+                    <span class="material-icons-round" style="font-size:14px">done</span>
+                  </button>
+                }
+                <button class="notif-action-btn notif-action-delete" (click)="deleteNotification(n.id, $event)" title="Delete">
+                  <span class="material-icons-round" style="font-size:14px">delete</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

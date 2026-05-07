@@ -18,6 +18,7 @@ export class LoginComponent implements OnInit {
   loading = false;
   error = '';
   showPassword = false;
+  private returnUrl = '/dashboard';
 
   constructor(
     private authService: AuthService,
@@ -27,9 +28,12 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Capture return URL from query params
+    this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard';
+
     // Remember Me: if user already has a valid token, skip login
     if (this.authService.isLoggedIn()) {
-      this.router.navigate(['/dashboard']);
+      this.router.navigate([this.returnUrl]);
       return;
     }
 
@@ -54,7 +58,7 @@ export class LoginComponent implements OnInit {
     this.authService.login({ email: this.email, password: this.password, rememberMe: this.rememberMe }).subscribe({
       next: () => {
         this.loading = false;
-        this.router.navigate(['/dashboard']);
+        this.router.navigate([this.returnUrl]);
       },
       error: (err) => {
         this.loading = false;
@@ -66,9 +70,5 @@ export class LoginComponent implements OnInit {
 
   loginWithGoogle(): void {
     window.location.href = 'http://localhost:8080/oauth2/authorization/google';
-  }
-
-  loginWithGithub(): void {
-    window.location.href = 'http://localhost:8080/oauth2/authorization/github';
   }
 }

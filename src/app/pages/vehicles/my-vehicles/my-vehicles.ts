@@ -37,8 +37,8 @@ export class MyVehiclesComponent implements OnInit {
   constructor(
     private vehicleService: VehicleService,
     private authService: AuthService,
-    private cdr: ChangeDetectorRef,
-  ) {}
+    private cdr: ChangeDetectorRef
+  ) { }
 
   ngOnInit(): void {
     this.loadVehicles();
@@ -190,10 +190,19 @@ export class MyVehiclesComponent implements OnInit {
 
   getTypeIcon(type: string): string {
     switch (type) {
-      case '2W': return '🏍️';
-      case '4W': return '🚗';
-      case 'HEAVY': return '🚛';
-      default: return '🚘';
+      case '2W': return 'two_wheeler';
+      case '4W': return 'directions_car';
+      case 'HEAVY': return 'local_shipping';
+      default: return 'directions_car';
+    }
+  }
+
+  getTypeColor(type: string): string {
+    switch (type) {
+      case '2W': return '#f472b6';
+      case '4W': return '#a78bfa';
+      case 'HEAVY': return '#fbbf24';
+      default: return '#94a3b8';
     }
   }
 
