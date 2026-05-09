@@ -58,7 +58,7 @@
   } @else {
     <div class="notif-list">
       @for (n of displayedNotifications; track n.id) {
-        <div class="notif-card" [class.notif-card-unread]="!n.read" (click)="markAsRead(n)">
+        <div class="notif-card" [class.notif-card-unread]="!n.read" [class.notif-card-expanded]="expandedId === n.id" (click)="toggleExpand(n)">
           <div class="notif-card-left">
             <div class="notif-card-icon"><span class="material-icons-round" [style.color]="getIconColor(n.type)" style="font-size:22px">{{ getIconName(n.type) }}</span></div>
             @if (!n.read) {
@@ -68,22 +68,35 @@
           <div class="notif-card-body">
             <div class="notif-card-top">
               <span class="notif-card-title">{{ n.title }}</span>
-              <span class="notif-card-time">{{ getTimeAgo(n.sentAt) }}</span>
-            </div>
-            <p class="notif-card-msg">{{ n.message }}</p>
-            <div class="notif-card-footer">
-              <span class="notif-card-type">{{ formatType(n.type) }}</span>
-              <div class="notif-card-actions">
-                @if (!n.read) {
-                  <button class="notif-action-btn" (click)="markAsRead(n)" title="Mark as read">
-                    <span class="material-icons-round" style="font-size:14px">done</span>
-                  </button>
-                }
-                <button class="notif-action-btn notif-action-delete" (click)="deleteNotification(n.id, $event)" title="Delete">
-                  <span class="material-icons-round" style="font-size:14px">delete</span>
-                </button>
+              <div class="notif-card-top-right">
+                <span class="notif-card-time">{{ getTimeAgo(n.sentAt) }}</span>
+                <span class="material-icons-round notif-expand-icon" style="font-size:16px;color:#555">{{ expandedId === n.id ? 'expand_less' : 'expand_more' }}</span>
               </div>
             </div>
+            <!-- Truncated preview -->
+            @if (expandedId !== n.id) {
+              <p class="notif-card-msg notif-card-msg-truncated">{{ n.message }}</p>
+              <span class="notif-card-type">{{ formatType(n.type) }}</span>
+            }
+            <!-- Expanded full view -->
+            @if (expandedId === n.id) {
+              <p class="notif-card-msg notif-card-msg-full">{{ n.message }}</p>
+              <div class="notif-card-footer">
+                <span class="notif-card-type">{{ formatType(n.type) }}</span>
+                <div class="notif-card-actions notif-card-actions-visible">
+                  @if (!n.read) {
+                    <button class="notif-action-btn notif-action-read" (click)="markAsRead(n); $event.stopPropagation()" title="Mark as read">
+                      <span class="material-icons-round" style="font-size:14px">done</span>
+                      <span class="notif-action-label">Mark as read</span>
+                    </button>
+                  }
+                  <button class="notif-action-btn notif-action-delete" (click)="deleteNotification(n.id, $event)" title="Delete">
+                    <span class="material-icons-round" style="font-size:14px">delete</span>
+                    <span class="notif-action-label">Delete</span>
+                  </button>
+                </div>
+              </div>
+            }
           </div>
         </div>
       }

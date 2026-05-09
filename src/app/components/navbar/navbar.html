@@ -49,6 +49,10 @@
           <span class="material-icons-round" style="font-size:18px">apartment</span>
           <span>Lots</span>
         </a>
+        <a routerLink="/admin/analytics" class="nb-link" routerLinkActive="nb-link-active">
+          <span class="material-icons-round" style="font-size:18px">bar_chart</span>
+          <span>Analytics</span>
+        </a>
       }
       @if (user) {
         <a routerLink="/settings" class="nb-link" routerLinkActive="nb-link-active">
@@ -120,7 +124,7 @@
         <div class="nb-user-pill">
           <div class="nb-avatar">
             @if (getAvatarUrl()) {
-              <img [src]="getAvatarUrl()" alt="" class="nb-avatar-img" />
+              <img [src]="getAvatarUrl()" alt="" class="nb-avatar-img" referrerpolicy="no-referrer" />
             } @else {
               {{ getInitials() }}
             }

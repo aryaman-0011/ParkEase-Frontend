@@ -30,6 +30,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   userRole: string = '';
   activeCategory = 'all';
   categories: Category[] = [];
+  expandedId: number | null = null;
   private sub?: Subscription;
 
   private roleCategories: Record<string, Category[]> = {
@@ -123,6 +124,11 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   getCategoryCount(cat: Category): number {
     if (cat.key === 'all') return this.notifications.length;
     return this.notifications.filter((n) => cat.types.includes(n.type)).length;
+  }
+
+  toggleExpand(notification: Notification): void {
+    this.expandedId = this.expandedId === notification.id ? null : notification.id;
+    this.cdr.detectChanges();
   }
 
   markAsRead(notification: Notification): void {

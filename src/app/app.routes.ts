@@ -18,6 +18,7 @@ import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 import { NotificationsComponent } from './pages/notifications/notifications';
 import { MyBookingsComponent } from './pages/bookings/my-bookings/my-bookings';
+import { AdminAnalyticsComponent } from './pages/admin/analytics/admin-analytics';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
@@ -36,6 +37,7 @@ export const routes: Routes = [
   { path: 'bookings', component: MyBookingsComponent, canActivate: [authGuard] },
   { path: 'admin/users', component: AdminUsersComponent, canActivate: [adminGuard] },
   { path: 'admin/lots', component: AdminLotsComponent, canActivate: [adminGuard] },
+  { path: 'admin/analytics', component: AdminAnalyticsComponent, canActivate: [adminGuard] },
   { path: 'notifications', component: NotificationsComponent, canActivate: [authGuard] },
   { path: '**', redirectTo: '' },
 ];
