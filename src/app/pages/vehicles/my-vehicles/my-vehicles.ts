@@ -5,6 +5,7 @@ import { VehicleService } from '../../../services/vehicle.service';
 import { AuthService } from '../../../services/auth.service';
 import { VehicleResponse } from '../../../models/vehicle.model';
 import { NavbarComponent } from '../../../components/navbar/navbar';
+import { Validators } from '../../../utils/validators';
 
 @Component({
   selector: 'app-my-vehicles',
@@ -112,6 +113,18 @@ export class MyVehiclesComponent implements OnInit {
       this.formError = 'License plate, make, and model are required.';
       setTimeout(() => { this.formError = ''; this.cdr.detectChanges(); }, 6000);
       return;
+    }
+    if (!this.editingVehicle) {
+      const plateErr = Validators.validateVehiclePlate(this.form.licensePlate);
+      if (plateErr) { this.formError = plateErr; this.cdr.detectChanges(); return; }
+    }
+    const makeErr = Validators.validateMakeModel(this.form.make, 'Make');
+    if (makeErr) { this.formError = makeErr; this.cdr.detectChanges(); return; }
+    const modelErr = Validators.validateMakeModel(this.form.model, 'Model');
+    if (modelErr) { this.formError = modelErr; this.cdr.detectChanges(); return; }
+    if (this.form.color) {
+      const colorErr = Validators.validateColor(this.form.color);
+      if (colorErr) { this.formError = colorErr; this.cdr.detectChanges(); return; }
     }
 
     const user = this.authService.getCurrentUser();

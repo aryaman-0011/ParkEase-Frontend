@@ -304,7 +304,7 @@
         <div class="form-row-bm">
           <div class="form-group-bm">
             <label>Start Date</label>
-            <input type="date" [(ngModel)]="bookForm.startDate" />
+            <input type="date" [(ngModel)]="bookForm.startDate" [min]="todayDate" />
           </div>
           <div class="form-group-bm">
             <label>Start Time</label>
@@ -316,7 +316,7 @@
         <div class="form-row-bm">
           <div class="form-group-bm">
             <label>End Date</label>
-            <input type="date" [(ngModel)]="bookForm.endDate" />
+            <input type="date" [(ngModel)]="bookForm.endDate" [min]="bookForm.startDate || todayDate" />
           </div>
           <div class="form-group-bm">
             <label>End Time</label>
@@ -362,7 +362,7 @@
         <div class="form-row-bm">
           <div class="form-group-bm">
             <label>New End Date</label>
-            <input type="date" [(ngModel)]="extendDate" />
+            <input type="date" [(ngModel)]="extendDate" [min]="todayDate" />
           </div>
           <div class="form-group-bm">
             <label>New End Time</label>

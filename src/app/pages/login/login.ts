@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { environment } from '../../../environments/environment';
+import { Validators } from '../../utils/validators';
 
 @Component({
   selector: 'app-login',
@@ -55,6 +56,8 @@ export class LoginComponent implements OnInit {
       this.error = 'Please fill in all fields';
       return;
     }
+    const emailErr = Validators.validateEmail(this.email);
+    if (emailErr) { this.error = emailErr; return; }
     this.loading = true;
     this.authService.login({ email: this.email, password: this.password, rememberMe: this.rememberMe }).subscribe({
       next: () => {

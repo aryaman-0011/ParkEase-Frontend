@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { Validators } from '../../utils/validators';
 
 @Component({
   selector: 'app-signup',
@@ -50,9 +51,16 @@ export class SignupComponent {
         this.error = 'Please fill in name and email';
         return;
       }
-      if (this.role === 'MANAGER' && !this.phone.trim()) {
-        this.error = 'Phone number is required for manager accounts';
-        return;
+      const nameErr = Validators.validateName(this.fullName);
+      if (nameErr) { this.error = nameErr; return; }
+      const emailErr = Validators.validateEmail(this.email);
+      if (emailErr) { this.error = emailErr; return; }
+      if (this.role === 'MANAGER') {
+        const phoneErr = Validators.validatePhoneRequired(this.phone);
+        if (phoneErr) { this.error = phoneErr; return; }
+      } else if (this.phone.trim()) {
+        const phoneErr = Validators.validatePhone(this.phone);
+        if (phoneErr) { this.error = phoneErr; return; }
       }
       this.error = '';
       this.step = 2;
@@ -66,6 +74,8 @@ export class SignupComponent {
         this.error = 'Password must be at least 8 characters';
         return;
       }
+      const pwErr = Validators.validatePassword(this.password);
+      if (pwErr) { this.error = pwErr; return; }
       if (this.password !== this.confirmPassword) {
         this.error = 'Passwords do not match';
         return;
@@ -93,6 +103,8 @@ export class SignupComponent {
         this.error = 'Password must be at least 8 characters';
         return;
       }
+      const pwErr = Validators.validatePassword(this.password);
+      if (pwErr) { this.error = pwErr; return; }
       if (this.password !== this.confirmPassword) {
         this.error = 'Passwords do not match';
         return;
@@ -101,14 +113,10 @@ export class SignupComponent {
 
     // Step 3 validation for managers
     if (this.step === 3) {
-      if (!this.businessName.trim()) {
-        this.error = 'Business name is required for manager accounts';
-        return;
-      }
-      if (!this.businessRegistration.trim()) {
-        this.error = 'Business registration / GST number is required';
-        return;
-      }
+      const bizErr = Validators.validateBusinessName(this.businessName);
+      if (bizErr) { this.error = bizErr; return; }
+      const gstErr = Validators.validateGST(this.businessRegistration);
+      if (gstErr) { this.error = gstErr; return; }
     }
 
     this.loading = true;

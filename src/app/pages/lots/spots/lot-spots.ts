@@ -72,6 +72,11 @@ export class LotSpotsComponent implements OnInit {
 
   spotTypes: SpotType[] = ['COMPACT', 'STANDARD', 'LARGE', 'MOTORBIKE', 'EV'];
 
+  /** Today's date string (yyyy-MM-dd) — used as [min] for date inputs */
+  get todayDate(): string {
+    return this.toDateStr(new Date());
+  }
+
   constructor(
     private spotService: SpotService,
     private lotService: LotService,
@@ -271,6 +276,7 @@ export class LotSpotsComponent implements OnInit {
     const start = this.parseDateTime(this.bookForm.startDate, this.bookForm.startTime);
     const end = this.parseDateTime(this.bookForm.endDate, this.bookForm.endTime);
     if (!start || !end) { this.showError('Please select valid start and end times.'); return; }
+    if (start < new Date()) { this.showError('Start time cannot be in the past.'); return; }
     if (end <= start) { this.showError('End time must be after start time.'); return; }
 
     this.showBookingModal = false;

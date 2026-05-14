@@ -6,6 +6,7 @@ import { AuthService } from '../../services/auth.service';
 import { UserResponse } from '../../models/auth.model';
 import { NavbarComponent } from '../../components/navbar/navbar';
 import { environment } from '../../../environments/environment';
+import { Validators } from '../../utils/validators';
 
 @Component({
   selector: 'app-settings',
@@ -72,6 +73,16 @@ export class SettingsComponent implements OnInit {
     if (!this.fullName.trim()) {
       this.error = 'Full name is required';
       return;
+    }
+    const nameErr = Validators.validateName(this.fullName);
+    if (nameErr) { this.error = nameErr; return; }
+    if (this.phone.trim()) {
+      const phoneErr = Validators.validatePhone(this.phone);
+      if (phoneErr) { this.error = phoneErr; return; }
+    }
+    if (this.vehiclePlate.trim()) {
+      const plateErr = Validators.validateVehiclePlate(this.vehiclePlate);
+      if (plateErr) { this.error = plateErr; return; }
     }
     this.loading = true;
     this.authService.updateProfile({
@@ -172,6 +183,8 @@ export class SettingsComponent implements OnInit {
       this.error = 'New password must be at least 8 characters';
       return;
     }
+    const pwErr = Validators.validatePassword(this.newPassword);
+    if (pwErr) { this.error = pwErr; return; }
     if (this.newPassword !== this.confirmPassword) {
       this.error = 'New passwords do not match';
       return;

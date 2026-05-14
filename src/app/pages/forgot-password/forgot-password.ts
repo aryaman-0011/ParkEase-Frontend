@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { Validators } from '../../utils/validators';
 
 @Component({
   selector: 'app-forgot-password',
@@ -34,6 +35,8 @@ export class ForgotPasswordComponent {
       this.error = 'Please enter your email';
       return;
     }
+    const emailErr = Validators.validateEmail(this.email);
+    if (emailErr) { this.error = emailErr; return; }
     this.loading = true;
     this.authService.forgotPassword({ email: this.email }).subscribe({
       next: (res) => {
@@ -80,6 +83,8 @@ export class ForgotPasswordComponent {
       this.error = 'Password must be at least 8 characters';
       return;
     }
+    const pwErr = Validators.validatePassword(this.newPassword);
+    if (pwErr) { this.error = pwErr; return; }
     if (this.newPassword !== this.confirmPassword) {
       this.error = 'Passwords do not match';
       return;
