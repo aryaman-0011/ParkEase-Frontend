@@ -1,0 +1,10 @@
+{
+  "buildCommand": "node scripts/write-env.js && npm run build",
+  "outputDirectory": "dist/parkease-frontend/browser",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
