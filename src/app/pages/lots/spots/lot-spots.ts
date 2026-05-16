@@ -354,11 +354,20 @@ export class LotSpotsComponent implements OnInit {
             },
           });
         } catch {
-          this.bookingLoading = false;
-          this.refreshData();
-          this.bookingMessage = `Spot ${b.spotNumber} booked! Payment skipped — pay at exit.`;
-          this.cdr.detectChanges();
-          setTimeout(() => { this.bookingMessage = ''; this.cdr.detectChanges(); }, 6000);
+          // User cancelled payment — cancel the booking
+          this.bookingService.cancelBooking(b.bookingId).subscribe({
+            next: () => {
+              this.activeBookings = this.activeBookings.filter(x => x.bookingId !== b.bookingId);
+              this.bookingLoading = false;
+              this.refreshData();
+              this.showError('Payment cancelled — booking has been removed.');
+            },
+            error: () => {
+              this.bookingLoading = false;
+              this.refreshData();
+              this.showError('Payment cancelled — please cancel the booking manually.');
+            },
+          });
         }
       },
       error: () => {

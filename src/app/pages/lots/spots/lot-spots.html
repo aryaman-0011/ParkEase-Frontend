@@ -340,6 +340,12 @@
           </div>
         </div>
 
+        @if (bookingError) {
+          <div class="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2 text-xs text-red-400 mt-3">
+            {{ bookingError }}
+          </div>
+        }
+
         <div class="flex gap-3 mt-4">
           <button (click)="dismissBookingModal()" class="booking-btn booking-btn-cancel flex-1">Cancel</button>
           <button (click)="submitBooking()" [disabled]="bookingLoading || estimatedHours === 0" class="booking-btn booking-btn-primary flex-1">
